@@ -10,6 +10,8 @@ class ReportImage extends Model
 {
     protected $fillable = ['report_id', 'path'];
 
+    protected $appends = ['url'];
+
     public function report(): BelongsTo
     {
         return $this->belongsTo(Report::class);
