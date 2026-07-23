@@ -1,4 +1,5 @@
 import AppLayout from '@/components/AppLayout';
+import StatusBadge from '@/components/report/StatusBadge';
 import { Link, usePage } from '@inertiajs/react';
 import type React from 'react';
 
@@ -68,9 +69,10 @@ function TeacherDashboard() {
 }
 
 function AdminDashboard() {
-    const { pendingCount, confirmedCount, resolvedCount, totalReports, recentReports, teams } = usePage().props as {
+    const { pendingCount, confirmedCount, rejectedCount, resolvedCount, totalReports, recentReports, teams } = usePage().props as {
         pendingCount: number;
         confirmedCount: number;
+        rejectedCount: number;
         resolvedCount: number;
         totalReports: number;
         recentReports: { id: number; title: string; status: string; user: { name: string } }[];
@@ -83,8 +85,11 @@ function AdminDashboard() {
             <div className="grid grid-cols-4 gap-4 mb-6">
                 <StatCard label="Pending" value={pendingCount} />
                 <StatCard label="Confirmed" value={confirmedCount} />
+                <StatCard label="Rejected" value={rejectedCount} />
                 <StatCard label="Resolved" value={resolvedCount} />
-                <StatCard label="Total" value={totalReports} />
+            </div>
+            <div className="mb-6">
+                <StatCard label="Total Reports" value={totalReports} />
             </div>
             <h2 className="text-lg font-semibold mb-2">Latest Reports</h2>
             <ReportList reports={recentReports} />
@@ -98,8 +103,10 @@ function ReportList({ reports }: { reports: { id: number; title: string; status:
             {reports.map((r) => (
                 <Link key={r.id} href={`/reports/${r.id}`} className="block bg-white p-3 rounded shadow hover:shadow-md">
                     <div className="font-medium">{r.title}</div>
-                    <div className="text-sm text-gray-500">
-                        Status: {r.status}{'user' in r ? ` — by ${r.user.name}` : ''}{'team' in r && r.team ? ` — ${r.team.name}` : ''}
+                    <div className="text-sm text-gray-500 flex items-center gap-2">
+                        <StatusBadge status={r.status as never} />
+                        {'user' in r ? <span>by {r.user.name}</span> : null}
+                        {'team' in r && r.team ? <span>— {r.team.name}</span> : null}
                     </div>
                 </Link>
             ))}

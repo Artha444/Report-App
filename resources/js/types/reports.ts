@@ -1,4 +1,4 @@
-export type ReportStatus = 'pending' | 'confirmed' | 'in_progress' | 'resolved' | 'rejected' | 'reopened';
+export type ReportStatus = 'pending' | 'confirmed' | 'in_progress' | 'resolved' | 'rejected';
 
 export type Report = {
     id: number;

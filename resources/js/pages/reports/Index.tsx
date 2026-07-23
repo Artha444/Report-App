@@ -1,4 +1,5 @@
 import AppLayout from '@/components/AppLayout';
+import StatusBadge from '@/components/report/StatusBadge';
 import { Link } from '@inertiajs/react';
 import type React from 'react';
 
@@ -24,7 +25,7 @@ export default function ReportIndex({ reports }: { reports: { data: { id: number
                         {reports.data.map((report) => (
                             <tr key={report.id} className="border-t">
                                 <td className="p-3">{report.title}</td>
-                                <td className="p-3"><StatusBadge status={report.status} /></td>
+                                <td className="p-3"><StatusBadge status={report.status as never} /></td>
                                 <td className="p-3">{report.priority}</td>
                                 <td className="p-3">{new Date(report.created_at).toLocaleDateString()}</td>
                                 <td className="p-3">
@@ -50,16 +51,6 @@ export default function ReportIndex({ reports }: { reports: { data: { id: number
             )}
         </div>
     );
-}
-
-function StatusBadge({ status }: { status: string }) {
-    const colors: Record<string, string> = {
-        pending: 'bg-yellow-100 text-yellow-800',
-        confirmed: 'bg-blue-100 text-blue-800',
-        in_progress: 'bg-orange-100 text-orange-800',
-        resolved: 'bg-green-100 text-green-800',
-    };
-    return <span className={`px-2 py-0.5 rounded text-xs font-medium ${colors[status] || 'bg-gray-100'}`}>{status.replace('_', ' ')}</span>;
 }
 
 ReportIndex.layout = (page: React.ReactNode) => <AppLayout>{page}</AppLayout>;

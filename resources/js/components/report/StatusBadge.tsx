@@ -6,7 +6,6 @@ const colors: Record<ReportStatus, string> = {
     in_progress: 'bg-orange-100 text-orange-800',
     resolved: 'bg-green-100 text-green-800',
     rejected: 'bg-red-100 text-red-800',
-    reopened: 'bg-purple-100 text-purple-800',
 };
 
 const labels: Record<ReportStatus, string> = {
@@ -15,7 +14,6 @@ const labels: Record<ReportStatus, string> = {
     in_progress: 'In Progress',
     resolved: 'Resolved',
     rejected: 'Rejected',
-    reopened: 'Reopened',
 };
 
 export default function StatusBadge({ status }: { status: ReportStatus }) {

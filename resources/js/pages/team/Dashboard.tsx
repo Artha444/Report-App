@@ -1,4 +1,5 @@
 import AppLayout from '@/components/AppLayout';
+import StatusBadge from '@/components/report/StatusBadge';
 import { Link, usePage } from '@inertiajs/react';
 import type React from 'react';
 
@@ -28,8 +29,9 @@ export default function TeamDashboard() {
                 {recentReports.map((r) => (
                     <Link key={r.id} href={`/reports/${r.id}`} className="block bg-white p-3 rounded shadow hover:shadow-md">
                         <div className="font-medium">{r.title}</div>
-                        <div className="text-sm text-gray-500">
-                            Status: {r.status} — by {r.user.name}
+                        <div className="text-sm text-gray-500 flex items-center gap-2">
+                            <StatusBadge status={r.status as never} />
+                            <span>by {r.user.name}</span>
                         </div>
                     </Link>
                 ))}

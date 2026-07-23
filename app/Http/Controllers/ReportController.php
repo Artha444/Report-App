@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Report;
 use App\Models\User;
 use App\Notifications\NewReportSubmitted;
+use App\Notifications\ReportReopened;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -81,11 +82,17 @@ class ReportController extends Controller
         ]);
 
         $report->update([
-            'status' => 'reopened',
+            'status' => 'in_progress',
             'user_feedback' => $validated['user_feedback'],
         ]);
 
         $report->addLog('reopened', $validated['user_feedback']);
+
+        if ($report->team) {
+            foreach ($report->team->members as $member) {
+                $member->notify(new ReportReopened($report));
+            }
+        }
 
         return back()->with('success', 'Report reopened.');
     }

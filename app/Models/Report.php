@@ -74,9 +74,4 @@ class Report extends Model
     {
         return $query->where('status', 'rejected');
     }
-
-    public function scopeReopened($query)
-    {
-        return $query->where('status', 'reopened');
-    }
 }

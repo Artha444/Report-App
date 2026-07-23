@@ -50,6 +50,7 @@ class DashboardController extends Controller
         return [
             'pendingCount' => Report::pending()->count(),
             'confirmedCount' => Report::confirmed()->count(),
+            'rejectedCount' => Report::rejected()->count(),
             'resolvedCount' => Report::resolved()->count(),
             'totalReports' => Report::count(),
             'recentReports' => Report::with(['user', 'team'])
