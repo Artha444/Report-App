@@ -25,9 +25,16 @@ class DashboardController extends Controller
 
     private function studentDashboard(): array
     {
+        $userId = auth()->id();
+        $query = Report::where('user_id', $userId);
+
         return [
-            'myReportsCount' => Report::where('user_id', auth()->id())->count(),
-            'recentReports' => Report::where('user_id', auth()->id())
+            'myReportsCount' => (clone $query)->count(),
+            'pendingCount' => (clone $query)->pending()->count(),
+            'inProgressCount' => (clone $query)->inProgress()->count(),
+            'resolvedCount' => (clone $query)->resolved()->count(),
+            'rejectedCount' => (clone $query)->rejected()->count(),
+            'recentReports' => Report::where('user_id', $userId)
                 ->latest()->take(5)->get(),
         ];
     }
