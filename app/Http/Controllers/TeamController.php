@@ -57,6 +57,7 @@ class TeamController extends Controller
     public function resolve(Request $request, Report $report): RedirectResponse
     {
         abort_unless($this->userCanActOnReport($report), 403);
+        abort_unless($report->status === 'in_progress', 400);
 
         $validated = $request->validate([
             'resolution_evidence' => 'required|image|max:10240',

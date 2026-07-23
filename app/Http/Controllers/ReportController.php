@@ -84,6 +84,7 @@ class ReportController extends Controller
         $report->update([
             'status' => 'in_progress',
             'user_feedback' => $validated['user_feedback'],
+            'resolved_at' => null,
         ]);
 
         $report->addLog('reopened', $validated['user_feedback']);

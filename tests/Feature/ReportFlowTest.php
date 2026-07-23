@@ -147,3 +147,47 @@ test('reopen requires feedback', function () {
     $response = $this->actingAs($user)->post("/reports/{$report->id}/reopen", []);
     $response->assertSessionHasErrors('user_feedback');
 });
+
+test('reject requires pending status', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    $report = Report::factory()->create(['status' => 'confirmed']);
+
+    $this->actingAs($admin)->post("/admin/reports/{$report->id}/reject", [
+        'rejection_reason' => 'Too late',
+    ])->assertStatus(400);
+
+    expect($report->fresh()->status)->toBe('confirmed');
+});
+
+test('resolve requires in_progress status', function () {
+    $teacher = User::factory()->create(['role' => 'teacher']);
+    $team = Team::factory()->create();
+    $team->members()->attach($teacher);
+
+    $report = Report::factory()->create([
+        'status' => 'pending',
+        'team_id' => $team->id,
+    ]);
+
+    $this->actingAs($teacher)->post("/team/reports/{$report->id}/resolve", [
+        'resolution_evidence' => UploadedFile::fake()->image('evidence.jpg'),
+        'resolution_notes' => 'Done',
+    ])->assertStatus(400);
+
+    expect($report->fresh()->status)->toBe('pending');
+});
+
+test('reopen clears resolved_at', function () {
+    $user = User::factory()->create(['role' => 'student']);
+    $report = Report::factory()->create([
+        'status' => 'resolved',
+        'user_id' => $user->id,
+        'resolved_at' => now(),
+    ]);
+
+    $this->actingAs($user)->post("/reports/{$report->id}/reopen", [
+        'user_feedback' => 'Still broken',
+    ]);
+
+    expect($report->fresh()->resolved_at)->toBeNull();
+});

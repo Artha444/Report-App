@@ -60,6 +60,8 @@ class AdminController extends Controller
 
     public function reject(Request $request, Report $report): RedirectResponse
     {
+        abort_unless($report->status === 'pending', 400);
+
         $validated = $request->validate([
             'rejection_reason' => 'required|string|max:1000',
         ]);
