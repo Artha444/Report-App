@@ -7,6 +7,7 @@ use App\Models\Team;
 use App\Models\User;
 use App\Notifications\ReportAssigned;
 use App\Notifications\ReportConfirmed;
+use App\Notifications\ReportRejected;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -55,6 +56,24 @@ class AdminController extends Controller
         }
 
         return back()->with('success', 'Report assigned to team.');
+    }
+
+    public function reject(Request $request, Report $report): RedirectResponse
+    {
+        $validated = $request->validate([
+            'rejection_reason' => 'required|string|max:1000',
+        ]);
+
+        $report->update([
+            'status' => 'rejected',
+            'rejection_reason' => $validated['rejection_reason'],
+        ]);
+
+        $report->addLog('rejected', $validated['rejection_reason']);
+
+        $report->user->notify(new ReportRejected($report));
+
+        return back()->with('success', 'Report rejected.');
     }
 
     public function users(): Response

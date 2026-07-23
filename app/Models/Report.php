@@ -16,6 +16,8 @@ class Report extends Model
     protected $fillable = [
         'user_id', 'title', 'description', 'location',
         'priority', 'status', 'team_id',
+        'rejection_reason', 'user_feedback',
+        'resolution_evidence', 'resolution_notes',
         'confirmed_at', 'resolved_at',
     ];
 
@@ -66,5 +68,15 @@ class Report extends Model
     public function scopeResolved($query)
     {
         return $query->where('status', 'resolved');
+    }
+
+    public function scopeRejected($query)
+    {
+        return $query->where('status', 'rejected');
+    }
+
+    public function scopeReopened($query)
+    {
+        return $query->where('status', 'reopened');
     }
 }

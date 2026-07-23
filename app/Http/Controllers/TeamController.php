@@ -54,16 +54,25 @@ class TeamController extends Controller
         return back()->with('success', 'Report marked in progress.');
     }
 
-    public function resolve(Report $report): RedirectResponse
+    public function resolve(Request $request, Report $report): RedirectResponse
     {
         abort_unless($this->userCanActOnReport($report), 403);
+
+        $validated = $request->validate([
+            'resolution_evidence' => 'required|image|max:10240',
+            'resolution_notes' => 'required|string|max:1000',
+        ]);
+
+        $path = $request->file('resolution_evidence')->store('evidence', 'public');
 
         $report->update([
             'status' => 'resolved',
             'resolved_at' => now(),
+            'resolution_evidence' => $path,
+            'resolution_notes' => $validated['resolution_notes'],
         ]);
 
-        $report->addLog('resolved', 'Report resolved');
+        $report->addLog('resolved', $validated['resolution_notes']);
 
         $report->user->notify(new ReportResolved($report));
 

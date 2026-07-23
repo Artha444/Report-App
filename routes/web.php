@@ -29,11 +29,13 @@ Route::middleware('auth')->group(function () {
         Route::get('create', [ReportController::class, 'create'])->name('create');
         Route::post('/', [ReportController::class, 'store'])->name('store');
         Route::get('{report}', [ReportController::class, 'show'])->name('show');
+        Route::post('{report}/reopen', [ReportController::class, 'reopen'])->name('reopen');
     });
 
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
         Route::get('reports', [AdminController::class, 'reports'])->name('reports');
         Route::post('reports/{report}/confirm', [AdminController::class, 'confirm'])->name('reports.confirm');
+        Route::post('reports/{report}/reject', [AdminController::class, 'reject'])->name('reports.reject');
         Route::post('reports/{report}/assign', [AdminController::class, 'assign'])->name('reports.assign');
         Route::get('users', [AdminController::class, 'users'])->name('users');
         Route::patch('users/{user}/role', [AdminController::class, 'updateRole'])->name('users.role');

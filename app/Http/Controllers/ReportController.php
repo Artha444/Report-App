@@ -70,4 +70,23 @@ class ReportController extends Controller
             'report' => $report,
         ]);
     }
+
+    public function reopen(Request $request, Report $report): RedirectResponse
+    {
+        abort_unless($report->user_id === auth()->id(), 403);
+        abort_unless($report->status === 'resolved', 400);
+
+        $validated = $request->validate([
+            'user_feedback' => 'required|string|max:1000',
+        ]);
+
+        $report->update([
+            'status' => 'reopened',
+            'user_feedback' => $validated['user_feedback'],
+        ]);
+
+        $report->addLog('reopened', $validated['user_feedback']);
+
+        return back()->with('success', 'Report reopened.');
+    }
 }

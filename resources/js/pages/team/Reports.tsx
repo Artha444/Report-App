@@ -1,4 +1,6 @@
 import AppLayout from '@/components/AppLayout';
+import StatusBadge from '@/components/report/StatusBadge';
+import ResolveForm from '@/components/report/ResolveForm';
 import { Link, useForm, usePage } from '@inertiajs/react';
 import type React from 'react';
 
@@ -7,13 +9,6 @@ export default function TeamReports() {
         reports: { data: { id: number; title: string; status: string; priority: string; team: { name: string } | null; user: { name: string } }[] };
     };
     const { post } = useForm();
-
-    const statusColors: Record<string, string> = {
-        pending: 'bg-yellow-100 text-yellow-800',
-        confirmed: 'bg-blue-100 text-blue-800',
-        in_progress: 'bg-orange-100 text-orange-800',
-        resolved: 'bg-green-100 text-green-800',
-    };
 
     return (
         <div>
@@ -36,9 +31,7 @@ export default function TeamReports() {
                                 <td className="p-3">{report.user.name}</td>
                                 <td className="p-3">{report.priority}</td>
                                 <td className="p-3">
-                                    <span className={`px-2 py-0.5 rounded text-xs font-medium ${statusColors[report.status]}`}>
-                                        {report.status.replace('_', ' ')}
-                                    </span>
+                                    <StatusBadge status={report.status as never} />
                                 </td>
                                 <td className="p-3 flex gap-2">
                                     <Link href={`/reports/${report.id}`} className="text-blue-600 text-sm">View</Link>
@@ -48,9 +41,7 @@ export default function TeamReports() {
                                         </button>
                                     )}
                                     {report.status === 'in_progress' && (
-                                        <button onClick={() => post(`/team/reports/${report.id}/resolve`)} className="text-green-600 text-sm">
-                                            Resolve
-                                        </button>
+                                        <ResolveForm reportId={report.id} />
                                     )}
                                 </td>
                             </tr>
