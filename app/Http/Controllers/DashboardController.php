@@ -2,37 +2,59 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\TeamInvitation;
-use Illuminate\Http\Request;
+use App\Models\Report;
+use App\Models\Team;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    public function __invoke(Request $request): Response
+    public function index(): Response
     {
-        $email = strtolower($request->user()->email);
+        $user = Auth::user();
 
-        $pendingInvitations = TeamInvitation::query()
-            ->with(['inviter', 'team'])
-            ->whereRaw('LOWER(email) = ?', [$email])
-            ->whereNull('accepted_at')
-            ->where(fn ($query) => $query
-                ->whereNull('expires_at')
-                ->orWhere('expires_at', '>=', now()))
-            ->latest()
-            ->get()
-            ->map(fn (TeamInvitation $invitation) => [
-                'code' => $invitation->code,
-                'inviterName' => $invitation->inviter->name,
-                'team' => [
-                    'name' => $invitation->team->name,
-                    'slug' => $invitation->team->slug,
-                ],
-            ]);
+        $data = match ($user->role) {
+            'admin' => $this->adminDashboard(),
+            'teacher' => $this->teacherDashboard(),
+            default => $this->studentDashboard(),
+        };
 
-        return Inertia::render('dashboard', [
-            'pendingInvitations' => $pendingInvitations,
-        ]);
+        return Inertia::render('dashboard/Index', $data);
+    }
+
+    private function studentDashboard(): array
+    {
+        return [
+            'myReportsCount' => Report::where('user_id', auth()->id())->count(),
+            'recentReports' => Report::where('user_id', auth()->id())
+                ->latest()->take(5)->get(),
+        ];
+    }
+
+    private function teacherDashboard(): array
+    {
+        $teamIds = Auth::user()->teams()->pluck('teams.id');
+
+        return [
+            'assignedCount' => Report::whereIn('team_id', $teamIds)->where('status', 'in_progress')->count(),
+            'resolvedCount' => Report::whereIn('team_id', $teamIds)->where('status', 'resolved')->count(),
+            'recentReports' => Report::whereIn('team_id', $teamIds)
+                ->with('team')->latest()->take(5)->get(),
+            'teams' => Auth::user()->teams,
+        ];
+    }
+
+    private function adminDashboard(): array
+    {
+        return [
+            'pendingCount' => Report::pending()->count(),
+            'confirmedCount' => Report::confirmed()->count(),
+            'resolvedCount' => Report::resolved()->count(),
+            'totalReports' => Report::count(),
+            'recentReports' => Report::with(['user', 'team'])
+                ->latest()->take(5)->get(),
+            'teams' => Team::with('members')->get(),
+        ];
     }
 }
