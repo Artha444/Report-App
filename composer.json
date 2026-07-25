@@ -11,8 +11,11 @@
     "require": {
         "php": "^8.3",
         "inertiajs/inertia-laravel": "^3.0",
-        "kreait/laravel-firebase": "^7.2",
+        "kreait/laravel-firebase": "*",
+        "laravel/chisel": "*",
+        "laravel/fortify": "*",
         "laravel/framework": "^13.17",
+        "laravel/passkeys": "*",
         "laravel/tinker": "^3.0",
         "laravel/wayfinder": "^0.1.14"
     },
