@@ -237,48 +237,6 @@ export default function CreateReport() {
                     </div>
                 </div>
             </form>
-
-            {/* Information Cards Footer */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-                {/* Card 1 */}
-                <div className="bg-white/80 p-4 rounded-2xl border border-gray-100 flex items-start gap-3 shadow-xs">
-                    <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center shrink-0 text-gray-900 mt-0.5">
-                        <ShieldCheck className="w-4 h-4" />
-                    </div>
-                    <div>
-                        <p className="text-xs font-bold text-gray-900">Kerahasiaan Terjamin</p>
-                        <p className="text-[11px] text-gray-500 mt-0.5 leading-relaxed">
-                            Identitas pelapor dilindungi oleh kebijakan institusi.
-                        </p>
-                    </div>
-                </div>
-
-                {/* Card 2 */}
-                <div className="bg-white/80 p-4 rounded-2xl border border-gray-100 flex items-start gap-3 shadow-xs">
-                    <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center shrink-0 text-gray-900 mt-0.5">
-                        <Clock className="w-4 h-4" />
-                    </div>
-                    <div>
-                        <p className="text-xs font-bold text-gray-900">Respon Cepat</p>
-                        <p className="text-[11px] text-gray-500 mt-0.5 leading-relaxed">
-                            Setiap laporan akan ditinjau dalam waktu maksimal 24 jam.
-                        </p>
-                    </div>
-                </div>
-
-                {/* Card 3 */}
-                <div className="bg-white/80 p-4 rounded-2xl border border-gray-100 flex items-start gap-3 shadow-xs">
-                    <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center shrink-0 text-gray-900 mt-0.5">
-                        <CheckCircle2 className="w-4 h-4" />
-                    </div>
-                    <div>
-                        <p className="text-xs font-bold text-gray-900">Transparansi</p>
-                        <p className="text-[11px] text-gray-500 mt-0.5 leading-relaxed">
-                            Pantau status penyelesaian laporan Anda secara real-time.
-                        </p>
-                    </div>
-                </div>
-            </div>
         </div>
     );
 }
