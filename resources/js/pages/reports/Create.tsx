@@ -15,6 +15,13 @@ import {
     ChevronDown
 } from 'lucide-react';
 
+const priorities = [
+    { value: 'low', label: 'Rendah', desc: 'Tidak mendesak', color: 'text-gray-500', bg: 'bg-gray-100', dot: 'bg-gray-400', ring: 'ring-gray-200', hoverBg: 'hover:bg-gray-50' },
+    { value: 'medium', label: 'Sedang', desc: 'Perlu perhatian', color: 'text-blue-600', bg: 'bg-blue-100', dot: 'bg-blue-500', ring: 'ring-blue-200', hoverBg: 'hover:bg-blue-50' },
+    { value: 'high', label: 'Tinggi', desc: 'Segera ditangani', color: 'text-orange-600', bg: 'bg-orange-100', dot: 'bg-orange-500', ring: 'ring-orange-200', hoverBg: 'hover:bg-orange-50' },
+    { value: 'critical', label: 'Kritis', desc: 'Darurat', color: 'text-red-600', bg: 'bg-red-100', dot: 'bg-red-500', ring: 'ring-red-200', hoverBg: 'hover:bg-red-50' },
+] as const;
+
 export default function CreateReport() {
     const { data, setData, post, processing, errors, reset } = useForm({
         title: '',
@@ -152,25 +159,10 @@ export default function CreateReport() {
                             <label className="block text-xs font-bold text-gray-700">
                                 Status Prioritas
                             </label>
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-700">
-                                    <AlertCircle className="w-4 h-4" />
-                                </div>
-                                <select
-                                    value={data.priority}
-                                    onChange={(e) => setData('priority', e.target.value)}
-                                    className="w-full pl-10 pr-10 py-3 rounded-xl border border-gray-200 text-xs sm:text-sm focus:outline-none focus:border-gray-400 appearance-none bg-white font-medium text-gray-800"
-                                >
-                                    <option value="" disabled>Pilih Prioritas</option>
-                                    <option value="low">Rendah</option>
-                                    <option value="medium">Sedang</option>
-                                    <option value="high">Tinggi</option>
-                                    <option value="critical">Kritis</option>
-                                </select>
-                                <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-gray-500">
-                                    <ChevronDown className="w-4 h-4" />
-                                </div>
-                            </div>
+                            <PriorityDropdown
+                                value={data.priority}
+                                onChange={(val) => setData('priority', val)}
+                            />
                         </div>
                     </div>
 
@@ -180,26 +172,8 @@ export default function CreateReport() {
                             Upload Foto Pendukung
                         </label>
 
-                        {/* Image Previews */}
-                        {previews.length > 0 && (
-                            <div className="flex gap-3 overflow-x-auto pb-2">
-                                {previews.map((src, i) => (
-                                    <div key={i} className="relative shrink-0 group">
-                                        <img src={src} className="w-20 h-20 object-cover rounded-xl border border-gray-200" alt="" />
-                                        <button
-                                            type="button"
-                                            onClick={() => removeImage(i)}
-                                            className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-white shadow-sm hover:bg-red-600 transition-colors"
-                                        >
-                                            <X className="w-3 h-3" />
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-
-                        {/* Dropzone */}
-                        {data.images.length < 5 && (
+                        {data.images.length === 0 ? (
+                            /* Empty state: full-width dropzone */
                             <label className="flex flex-col items-center justify-center w-full py-8 border-2 border-dashed border-gray-200 rounded-2xl cursor-pointer hover:border-gray-400 hover:bg-gray-50/50 transition-all text-center">
                                 <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center mb-3 text-gray-600">
                                     <UploadCloud className="w-5 h-5" />
@@ -218,6 +192,35 @@ export default function CreateReport() {
                                     className="hidden"
                                 />
                             </label>
+                        ) : (
+                            /* Has images: inline row with preview cards + add button */
+                            <div className="flex gap-3 overflow-x-auto pt-2 pr-2 pb-2">
+                                {previews.map((src, i) => (
+                                    <div key={i} className="relative shrink-0 group">
+                                        <img src={src} className="w-20 h-20 object-cover rounded-xl border border-gray-200" alt="" />
+                                        <button
+                                            type="button"
+                                            onClick={() => removeImage(i)}
+                                            className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-white shadow-sm hover:bg-red-600 transition-colors"
+                                        >
+                                            <X className="w-3 h-3" />
+                                        </button>
+                                    </div>
+                                ))}
+                                {data.images.length < 5 && (
+                                    <label className="shrink-0 w-20 h-20 flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-200 cursor-pointer hover:border-gray-400 hover:bg-gray-50/50 transition-all text-center">
+                                        <UploadCloud className="w-4 h-4 text-gray-400 mb-1" />
+                                        <span className="text-[10px] font-medium text-gray-400">Tambah</span>
+                                        <input
+                                            type="file"
+                                            multiple
+                                            accept="image/*"
+                                            onChange={handleImageUpload}
+                                            className="hidden"
+                                        />
+                                    </label>
+                                )}
+                            </div>
                         )}
                         {errors.images && <p className="text-red-500 text-xs mt-1">{errors.images}</p>}
                     </div>
@@ -241,6 +244,84 @@ export default function CreateReport() {
                     </div>
                 </div>
             </form>
+        </div>
+    );
+}
+
+function PriorityDropdown({ value, onChange }: { value: string; onChange: (val: string) => void }) {
+    const [open, setOpen] = useState(false);
+    const ref = useRef<HTMLDivElement>(null);
+    const selected = priorities.find((p) => p.value === value) ?? priorities[1];
+
+    useEffect(() => {
+        function handleClickOutside(e: MouseEvent) {
+            if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+        }
+        function handleEsc(e: KeyboardEvent) {
+            if (e.key === 'Escape') setOpen(false);
+        }
+        document.addEventListener('mousedown', handleClickOutside);
+        document.addEventListener('keydown', handleEsc);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('keydown', handleEsc);
+        };
+    }, []);
+
+    return (
+        <div ref={ref} className="relative">
+            <button
+                type="button"
+                onClick={() => setOpen((prev) => !prev)}
+                className={`w-full flex items-center gap-3 pl-10 pr-4 py-3 rounded-xl border text-left text-xs sm:text-sm font-medium transition-all ${
+                    open ? 'border-gray-400 ring-2 ring-black/5' : 'border-gray-200 hover:border-gray-300'
+                }`}
+            >
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                    <AlertCircle className="w-4 h-4 text-gray-700" />
+                </div>
+                <span className={`w-2 h-2 rounded-full ${selected.dot} shrink-0`} />
+                <span className="text-gray-800 flex-1">{selected.label}</span>
+                <ChevronDown
+                    className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+                />
+            </button>
+
+            <div
+                className={`absolute z-50 mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden transition-all duration-200 origin-top ${
+                    open ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-1 pointer-events-none'
+                }`}
+            >
+                <div className="p-1.5">
+                    {priorities.map((p) => {
+                        const active = p.value === value;
+                        return (
+                            <button
+                                key={p.value}
+                                type="button"
+                                onClick={() => {
+                                    onChange(p.value);
+                                    setOpen(false);
+                                }}
+                                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-all ${
+                                    active
+                                        ? `${p.bg} ${p.color}`
+                                        : `text-gray-700 ${p.hoverBg}`
+                                }`}
+                            >
+                                <span className={`w-2 h-2 rounded-full ${active ? p.dot : 'bg-gray-300'} shrink-0`} />
+                                <div className="flex-1 min-w-0">
+                                    <p className={`text-xs font-semibold ${active ? '' : 'text-gray-800'}`}>{p.label}</p>
+                                    <p className={`text-[11px] ${active ? 'opacity-80' : 'text-gray-400'}`}>{p.desc}</p>
+                                </div>
+                                {active && (
+                                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0 opacity-60" />
+                                )}
+                            </button>
+                        );
+                    })}
+                </div>
+            </div>
         </div>
     );
 }

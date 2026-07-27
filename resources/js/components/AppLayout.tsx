@@ -2,7 +2,7 @@ import { Link, usePage } from '@inertiajs/react';
 import type { Auth } from '@/types/auth';
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
-import { requestNotificationPermission } from '@/lib/firebase';
+import { setupForegroundListener } from '@/lib/firebase';
 import {
     LayoutDashboard,
     PlusSquare,
@@ -25,20 +25,10 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
     useEffect(() => {
-        if ('Notification' in window && 'serviceWorker' in navigator) {
-            requestNotificationPermission().then((token) => {
-                if (token) {
-                    fetch('/device-tokens', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '',
-                        },
-                        body: JSON.stringify({ token }),
-                    });
-                }
-            });
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/firebase-messaging-sw.js').catch(() => {});
         }
+        setupForegroundListener();
     }, []);
 
     useEffect(() => {

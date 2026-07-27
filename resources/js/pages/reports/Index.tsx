@@ -1,5 +1,5 @@
 import AppLayout from '@/components/AppLayout';
-import { Link } from '@inertiajs/react';
+import { Link, usePoll } from '@inertiajs/react';
 import type React from 'react';
 import { useState } from 'react';
 import {
@@ -39,6 +39,8 @@ type Props = {
 export default function ReportIndex({ reports }: Props) {
     const [searchQuery, setSearchQuery] = useState('');
     const [activeFilter, setActiveFilter] = useState<'all' | 'latest' | 'priority'>('all');
+
+    usePoll(5000, { only: ['reports'] });
 
     // Filter berdasarkan kata kunci pencarian
     const filteredReports = reports.data.filter((report) => {
