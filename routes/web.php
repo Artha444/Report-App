@@ -8,6 +8,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeviceTokenController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\TeamController;
+use App\Http\Controllers\TestNotificationController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
@@ -23,6 +24,9 @@ Route::middleware('auth')->group(function () {
     Route::post('logout', [LogoutController::class, 'destroy'])->name('logout');
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('device-tokens', [DeviceTokenController::class, 'store'])->name('device-tokens.store');
+
+    Route::get('test-notification', [TestNotificationController::class, 'index'])->name('test-notification');
+    Route::post('test-notification', [TestNotificationController::class, 'send'])->name('test-notification.send');
 
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::get('/', [ReportController::class, 'index'])->name('index');

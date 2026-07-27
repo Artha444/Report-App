@@ -1,7 +1,7 @@
 import AppLayout from '@/components/AppLayout';
 import StatusBadge from '@/components/report/StatusBadge';
 import RejectDialog from '@/components/report/RejectDialog';
-import { Link, useForm, usePage } from '@inertiajs/react';
+import { Link, useForm, usePage, usePoll } from '@inertiajs/react';
 import type React from 'react';
 import { useState } from 'react';
 import { ClipboardList, ArrowRight, ChevronDown, CheckCircle, Send, UserCog } from 'lucide-react';
@@ -48,6 +48,8 @@ export default function AdminReports() {
     const [activeTab, setActiveTab] = useState('all');
     const [assigningId, setAssigningId] = useState<number | null>(null);
     const [assignTeamId, setAssignTeamId] = useState('');
+
+    usePoll(5000, { only: ['reports'] });
 
     const filtered = activeTab === 'all'
         ? reports.data

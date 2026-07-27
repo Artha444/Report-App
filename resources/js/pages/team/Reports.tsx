@@ -1,7 +1,7 @@
 import AppLayout from '@/components/AppLayout';
 import StatusBadge from '@/components/report/StatusBadge';
 import ResolveForm from '@/components/report/ResolveForm';
-import { Link, useForm, usePage } from '@inertiajs/react';
+import { Link, useForm, usePage, usePoll } from '@inertiajs/react';
 import type React from 'react';
 import { useState } from 'react';
 import { ClipboardCheck, ArrowRight, Play } from 'lucide-react';
@@ -41,6 +41,8 @@ export default function TeamReports() {
     };
     const { post } = useForm();
     const [activeTab, setActiveTab] = useState('all');
+
+    usePoll(5000, { only: ['reports'] });
 
     const filtered = activeTab === 'all'
         ? reports.data
