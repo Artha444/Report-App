@@ -48,6 +48,21 @@ class User extends Authenticatable
         return $this->role === 'teacher';
     }
 
+    public function isJanitor(): bool
+    {
+        return $this->role === 'janitor';
+    }
+
+    public function isTechnician(): bool
+    {
+        return $this->role === 'technician';
+    }
+
+    public function isStaff(): bool
+    {
+        return in_array($this->role, ['teacher', 'janitor', 'technician']);
+    }
+
     public function isAdmin(): bool
     {
         return $this->role === 'admin';

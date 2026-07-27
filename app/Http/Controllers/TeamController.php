@@ -86,6 +86,7 @@ class TeamController extends Controller
     {
         return Inertia::render('admin/Teams', [
             'teams' => Team::with('members')->latest()->get(),
+            'staffMembers' => User::whereIn('role', ['teacher', 'janitor', 'technician'])->select('id', 'name', 'role')->orderBy('name')->get(),
         ]);
     }
 
@@ -125,7 +126,7 @@ class TeamController extends Controller
         $validated = $request->validate(['user_id' => 'required|exists:users,id']);
         $user = User::findOrFail($validated['user_id']);
 
-        abort_unless($user->isTeacher(), 422, 'Only teachers can be added to teams.');
+        abort_unless($user->isStaff(), 422, 'Only staff members can be added to teams.');
 
         $team->members()->syncWithoutDetaching($user);
 
