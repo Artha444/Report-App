@@ -130,6 +130,14 @@ function StudentDashboard() {
                                 Lihat Semua
                             </Link>
                         </div>
+                        <div className="relative mb-4 mx-6">
+                            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Cari laporan..."
+                                className="w-full bg-gray-50 border border-gray-100 rounded-xl py-2.5 pl-10 pr-4 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-gray-900/10 transition-all"
+                            />
+                        </div>
 
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
@@ -192,28 +200,6 @@ function StudentDashboard() {
 
                 {/* Right Column / Sidebar Area */}
                 <div className="space-y-6">
-                    {/* Widget: Cari Laporan */}
-                    <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-                        <h3 className="font-bold text-gray-900 text-base mb-4">Cari Laporan</h3>
-                        <div className="relative mb-4">
-                            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
-                            <input
-                                type="text"
-                                placeholder="ID Laporan atau kata kunci..."
-                                className="w-full bg-gray-50 border border-gray-100 rounded-xl py-2.5 pl-10 pr-4 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-gray-900/10 transition-all"
-                            />
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                            {['Infrastruktur', 'Kebersihan', 'Keamanan', 'Fasilitas Kelas'].map((tag) => (
-                                <button
-                                    key={tag}
-                                    className="px-3 py-1.5 bg-gray-50 hover:bg-gray-100 text-gray-600 text-[11px] font-medium rounded-xl transition-colors"
-                                >
-                                    {tag}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
 
                     {/* Widget: Butuh Bantuan? */}
                     <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-4">
