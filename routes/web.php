@@ -30,7 +30,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::get('/', [ReportController::class, 'index'])->name('index');
         Route::get('create', [ReportController::class, 'create'])->name('create');
-        Route::post('/', [ReportController::class, 'store'])->name('store');
+        Route::post('/', [ReportController::class, 'store'])->middleware('throttle:report-creation')->name('store');
         Route::get('{report}', [ReportController::class, 'show'])->name('show');
         Route::post('{report}/reopen', [ReportController::class, 'reopen'])->name('reopen');
     });
