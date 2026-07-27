@@ -87,7 +87,7 @@ export default function ReportIndex({ reports }: Props) {
             {/* Header Section */}
             <div>
                 <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
-                    Riwayat Laporan
+                         Laporan
                 </h1>
                 <p className="text-xs sm:text-sm text-gray-500 mt-1">
                     Pantau status dan perkembangan semua laporan Anda secara real-time.
@@ -180,6 +180,15 @@ export default function ReportIndex({ reports }: Props) {
                     <SlidersHorizontal className="w-3.5 h-3.5" />
                     <span>Filter Lanjutan</span>
                 </button>
+            </div>
+
+            <div className="relative mb-4 ">
+                <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                        type="text"
+                        placeholder="Cari laporan..."
+                        className="w-full bg-white-50 border border-gray-100 rounded-xl py-2.5 pl-10 pr-4 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-gray-900/10 transition-all"
+                    />
             </div>
 
             {/* Report Cards List */}
