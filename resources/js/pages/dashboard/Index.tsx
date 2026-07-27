@@ -138,14 +138,6 @@ function StudentDashboard() {
                                 Lihat Semua
                             </Link>
                         </div>
-                        <div className="relative mb-4 mx-6">
-                            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
-                            <input
-                                type="text"
-                                placeholder="Cari laporan..."
-                                className="w-full bg-gray-50 border border-gray-100 rounded-xl py-2.5 pl-10 pr-4 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-gray-900/10 transition-all"
-                            />
-                        </div>
 
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">

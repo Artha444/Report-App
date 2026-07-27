@@ -262,6 +262,7 @@ export default function ReportShow({ report }: { report: Report }) {
                     )}
                 </div>
             )}
+            halo
 
             {/* Reopen */}
             {canReopen && (
