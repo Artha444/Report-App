@@ -4,7 +4,7 @@ import type React from 'react';
 import { useState } from 'react';
 
 export default function AdminTeams() {
-    const { teams } = usePage().props as { teams: { id: number; name: string; description: string | null; members: { id: number; name: string }[] }[] };
+    const { teams, staffMembers } = usePage().props as { teams: { id: number; name: string; description: string | null; members: { id: number; name: string }[] }[], staffMembers: { id: number; name: string; role: string }[] };
     const { data, setData, post, put, delete: destroy, processing } = useForm({ name: '', description: '' });
     const [editing, setEditing] = useState<number | null>(null);
     const [addMember, setAddMember] = useState<number | null>(null);
@@ -72,9 +72,13 @@ export default function AdminTeams() {
                                     </div>
                                     {addMember === team.id ? (
                                         <div className="flex gap-2 mt-2">
-                                            <input value={memberUserId} onChange={(e) => setMemberUserId(e.target.value)}
-                                                placeholder="User ID" type="number" className="border rounded p-1 text-sm w-24" />
-                                            <button onClick={() => addMemberToTeam(team.id)} className="bg-green-600 text-white px-2 py-1 rounded text-sm">Add</button>
+                                            <select value={memberUserId} onChange={(e) => setMemberUserId(e.target.value)} className="border rounded p-1 text-sm w-48">
+                                                <option value="" disabled>Select Staff</option>
+                                                {staffMembers.map(staff => (
+                                                    <option key={staff.id} value={staff.id}>{staff.name} ({staff.role})</option>
+                                                ))}
+                                            </select>
+                                            <button onClick={() => addMemberToTeam(team.id)} className="bg-green-600 text-white px-2 py-1 rounded text-sm" disabled={!memberUserId}>Add</button>
                                             <button onClick={() => setAddMember(null)} className="text-gray-600 text-sm">Cancel</button>
                                         </div>
                                     ) : (
