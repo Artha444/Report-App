@@ -10,7 +10,10 @@ import {
     LogOut,
     Settings,
     Menu,
-    Megaphone
+    Megaphone,
+    FileText,
+    Users,
+    CircleUser
 } from 'lucide-react';
 
 type NavItem = {
@@ -52,9 +55,9 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
     if (auth.user.role === 'admin') {
         mainNav.push(
-            { href: '/admin/reports', label: 'Semua Laporan', icon: History },
-            { href: '/admin/teams', label: 'Kelola Tim', icon: History },
-            { href: '/admin/users', label: 'Kelola Pengguna', icon: History },
+            { href: '/admin/reports', label: 'Semua Laporan', icon: FileText },
+            { href: '/admin/teams', label: 'Kelola Tim', icon: Users },
+            { href: '/admin/users', label: 'Kelola Pengguna', icon: CircleUser },
         );
     }
 
