@@ -211,7 +211,7 @@ function StudentDashboard() {
                                 <MessageSquare className="w-4 h-4 text-gray-700 mt-0.5 shrink-0" />
                                 <div>
                                     <p className="text-xs font-bold text-gray-900">Chat Support</p>
-                                    <p className="text-[11px] text-gray-400">Respons cepat 08:00 - 16:00</p>
+                                    <p className="text-[11px] text-gray-400">Respons cepat 07:00 - 15:30</p>
                                 </div>
                             </div>
 
