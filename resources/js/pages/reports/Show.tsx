@@ -42,6 +42,12 @@ function formatDate(date: string) {
 
 export default function ReportShow({ report }: { report: Report }) {
     const { auth } = usePage().props as { auth: Auth };
+    const backUrl = auth.user.role === 'admin' ? '/admin/reports'
+        : auth.user.role === 'teacher' ? '/team/reports'
+        : '/reports';
+    const backLabel = auth.user.role === 'admin' ? 'All Reports'
+        : auth.user.role === 'teacher' ? 'Team Reports'
+        : 'Riwayat';
     const canReopen = report.status === 'resolved' && report.user.id === auth.user.id;
     const [reopenOpen, setReopenOpen] = useState(false);
     const [reopenFeedback, setReopenFeedback] = useState('');
@@ -64,11 +70,11 @@ export default function ReportShow({ report }: { report: Report }) {
                 <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-white/5 rounded-full" />
                 <div className="relative z-10">
                     <Link
-                        href="/reports"
+                        href={backUrl}
                         className="inline-flex items-center gap-1 text-slate-400 text-sm hover:text-white transition-colors mb-3"
                     >
                         <ArrowLeft className="w-4 h-4" />
-                        Riwayat
+                        {backLabel}
                     </Link>
                     <h1 className="text-xl sm:text-2xl font-bold text-white">{report.title}</h1>
                     <div className="flex items-center gap-2 mt-2 flex-wrap">

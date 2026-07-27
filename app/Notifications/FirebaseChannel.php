@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\DeviceToken;
+use Illuminate\Container\Container;
 use Illuminate\Notifications\Notification;
 use Kreait\Firebase\Contract\Messaging;
 use Kreait\Firebase\Exception\Messaging\InvalidArgument;
@@ -12,10 +13,18 @@ use Kreait\Firebase\Messaging\Notification as FirebaseNotification;
 
 class FirebaseChannel
 {
-    public function __construct(private Messaging $messaging) {}
-
     public function send(object $notifiable, Notification $notification): void
     {
+        if (! config('firebase.projects.app.credentials')) {
+            return;
+        }
+
+        try {
+            $messaging = Container::getInstance()->make(Messaging::class);
+        } catch (\Throwable) {
+            return;
+        }
+
         if (! $data = $notification->toFirebase($notifiable)) {
             return;
         }
@@ -32,7 +41,7 @@ class FirebaseChannel
                 ->withToken($token);
 
             try {
-                $this->messaging->send($message);
+                $messaging->send($message);
             } catch (NotFound|InvalidArgument) {
                 DeviceToken::where('token', $token)->delete();
             }
