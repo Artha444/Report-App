@@ -1,5 +1,5 @@
 import AppLayout from '@/components/AppLayout';
-import { useForm, usePage } from '@inertiajs/react';
+import { router, useForm, usePage } from '@inertiajs/react';
 import type React from 'react';
 import { useState } from 'react';
 
@@ -21,7 +21,7 @@ export default function AdminTeams() {
     }
 
     function addMemberToTeam(teamId: number) {
-        post(`/admin/teams/${teamId}/members`, { data: { user_id: memberUserId }, onSuccess: () => { setAddMember(null); setMemberUserId(''); } });
+        router.post(`/admin/teams/${teamId}/members`, { user_id: memberUserId }, { onSuccess: () => { setAddMember(null); setMemberUserId(''); } });
     }
 
     return (

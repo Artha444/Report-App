@@ -1,10 +1,10 @@
 import AppLayout from '@/components/AppLayout';
 import StatusBadge from '@/components/report/StatusBadge';
 import RejectDialog from '@/components/report/RejectDialog';
-import { Link, useForm, usePage, usePoll } from '@inertiajs/react';
+import { Link, router, useForm, usePage } from '@inertiajs/react';
 import type React from 'react';
 import { useState } from 'react';
-import { ClipboardList, ArrowRight, ChevronDown, CheckCircle, Send, UserCog } from 'lucide-react';
+import { ClipboardList, ArrowRight, CheckCircle, Send, UserCog } from 'lucide-react';
 
 type Report = {
     id: number;
@@ -62,8 +62,9 @@ export default function AdminReports() {
 
     function handleAssign(reportId: number) {
         if (!assignTeamId) return;
-        post(`/admin/reports/${reportId}/assign`, {
-            data: { team_id: assignTeamId },
+        router.post(`/admin/reports/${reportId}/assign`, {
+            team_id: assignTeamId,
+        }, {
             onSuccess: () => { setAssigningId(null); setAssignTeamId(''); },
         });
     }
