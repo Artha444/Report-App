@@ -32,6 +32,7 @@ export default function CreateReport() {
     });
 
     const [previews, setPreviews] = useState<string[]>([]);
+    const isSubmitting = useRef(false);
 
     const fieldOrder = ['title', 'description', 'location', 'images'] as const;
 
@@ -62,8 +63,11 @@ export default function CreateReport() {
 
     function submit(e: React.FormEvent) {
         e.preventDefault();
+        if (isSubmitting.current || processing) return;
+        isSubmitting.current = true;
         post('/reports', {
             forceFormData: true,
+            onFinish: () => { isSubmitting.current = false; },
             onSuccess: () => {
                 reset();
                 setPreviews([]);

@@ -8,10 +8,12 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeviceTokenController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\TeamController;
-use App\Http\Controllers\TestNotificationController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
-Route::inertia('/', 'welcome')->name('home');
+Route::get('/', function () {
+    return Auth::check() ? to_route('dashboard') : to_route('login');
+})->name('home');
 
 Route::middleware('guest')->group(function () {
     Route::get('login', [LoginController::class, 'create'])->name('login');
@@ -25,13 +27,10 @@ Route::middleware('auth')->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('device-tokens', [DeviceTokenController::class, 'store'])->name('device-tokens.store');
 
-    Route::get('test-notification', [TestNotificationController::class, 'index'])->name('test-notification');
-    Route::post('test-notification', [TestNotificationController::class, 'send'])->name('test-notification.send');
-
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::get('/', [ReportController::class, 'index'])->name('index');
         Route::get('create', [ReportController::class, 'create'])->name('create');
-        Route::post('/', [ReportController::class, 'store'])->name('store');
+        Route::post('/', [ReportController::class, 'store'])->middleware('throttle:report-creation')->name('store');
         Route::get('{report}', [ReportController::class, 'show'])->name('show');
         Route::post('{report}/reopen', [ReportController::class, 'reopen'])->name('reopen');
     });
