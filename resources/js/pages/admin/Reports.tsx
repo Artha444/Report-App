@@ -1,8 +1,7 @@
 import AppLayout from '@/components/AppLayout';
 import StatusBadge from '@/components/report/StatusBadge';
 import RejectDialog from '@/components/report/RejectDialog';
-import { Link, router, useForm, usePage } from '@inertiajs/react';
-import { Link, useForm, usePage, usePoll } from '@inertiajs/react';
+import { Link, router, useForm, usePage, usePoll } from '@inertiajs/react';
 import type React from 'react';
 import { useState } from 'react';
 import { ClipboardList, ArrowRight, ChevronDown, CheckCircle, Send, UserCog } from 'lucide-react';
