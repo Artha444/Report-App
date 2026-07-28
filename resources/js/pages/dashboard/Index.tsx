@@ -1,5 +1,5 @@
 import AppLayout from '@/components/AppLayout';
-import { Link, usePage } from '@inertiajs/react';
+import { Link, usePage, usePoll } from '@inertiajs/react';
 import {
     Search,
     HelpCircle,
@@ -13,6 +13,14 @@ import type React from 'react';
 
 export default function Dashboard() {
     const { props } = usePage();
+
+    usePoll(8000, {
+        only: [
+            'myReportsCount', 'pendingCount', 'inProgressCount', 'resolvedCount',
+            'assignedCount', 'confirmedCount', 'rejectedCount', 'totalReports',
+            'recentReports',
+        ],
+    });
 
     if ('totalReports' in props) {
         return <AdminDashboard />;

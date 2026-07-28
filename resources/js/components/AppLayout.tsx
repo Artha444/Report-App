@@ -2,7 +2,7 @@ import { Link, usePage } from '@inertiajs/react';
 import type { Auth } from '@/types/auth';
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
-import { requestNotificationPermission } from '@/lib/firebase';
+import { setupForegroundListener } from '@/lib/firebase';
 import {
     LayoutDashboard,
     PlusSquare,
@@ -10,7 +10,10 @@ import {
     LogOut,
     Settings,
     Menu,
-    Megaphone
+    Megaphone,
+    FileText,
+    Users,
+    CircleUser
 } from 'lucide-react';
 
 type NavItem = {
@@ -25,20 +28,10 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
     useEffect(() => {
-        if ('Notification' in window && 'serviceWorker' in navigator) {
-            requestNotificationPermission().then((token) => {
-                if (token) {
-                    fetch('/device-tokens', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '',
-                        },
-                        body: JSON.stringify({ token }),
-                    });
-                }
-            });
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/firebase-messaging-sw.js').catch(() => {});
         }
+        setupForegroundListener();
     }, []);
 
     useEffect(() => {
@@ -62,9 +55,9 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
     if (auth.user.role === 'admin') {
         mainNav.push(
-            { href: '/admin/reports', label: 'Semua Laporan', icon: History },
-            { href: '/admin/teams', label: 'Kelola Tim', icon: History },
-            { href: '/admin/users', label: 'Kelola Pengguna', icon: History },
+            { href: '/admin/reports', label: 'Semua Laporan', icon: FileText },
+            { href: '/admin/teams', label: 'Kelola Tim', icon: Users },
+            { href: '/admin/users', label: 'Kelola Pengguna', icon: CircleUser },
         );
     }
 

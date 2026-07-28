@@ -29,7 +29,7 @@ class FirebaseChannel
             return;
         }
 
-        $tokens = DeviceToken::where('user_id', $notifiable->id)->pluck('token');
+        $tokens = DeviceToken::where('user_id', $notifiable->id)->pluck('token')->unique();
 
         foreach ($tokens as $token) {
             $message = CloudMessage::new()
