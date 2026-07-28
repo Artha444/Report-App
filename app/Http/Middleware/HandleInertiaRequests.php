@@ -27,7 +27,7 @@ class HandleInertiaRequests extends Middleware
         if ($request->user()) {
             $data['auth']['notifications'] = $request->user()->notifications()->take(10)->get();
 
-            if ($request->user()->isTeacher() || $request->user()->isAdmin()) {
+            if ($request->user()->isStaff() || $request->user()->isAdmin()) {
                 $data['auth']['teams'] = $request->user()->teams;
             }
         }

@@ -13,8 +13,12 @@ use Inertia\Response;
 
 class TeamController extends Controller
 {
-    public function dashboard(): Response
+    public function dashboard(): Response | RedirectResponse
     {
+        if (!auth()->user()->teams()->exists()) {
+            return redirect()->route('dashboard');
+        }
+
         $teamIds = auth()->user()->teams()->pluck('teams.id');
 
         $assignedCount = Report::whereIn('team_id', $teamIds)->where('status', 'in_progress')->count();

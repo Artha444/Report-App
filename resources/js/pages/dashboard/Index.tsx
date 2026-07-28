@@ -1,4 +1,3 @@
-import AppLayout from '@/components/AppLayout';
 import { Link, usePage, usePoll } from '@inertiajs/react';
 import {
     Search,
@@ -10,6 +9,7 @@ import {
     Calendar
 } from 'lucide-react';
 import type React from 'react';
+import AppLayout from '@/components/AppLayout';
 
 export default function Dashboard() {
     const { props } = usePage();
@@ -25,9 +25,11 @@ export default function Dashboard() {
     if ('totalReports' in props) {
         return <AdminDashboard />;
     }
+
     if ('assignedCount' in props) {
         return <TeacherDashboard />;
     }
+
     return <StudentDashboard />;
 }
 
