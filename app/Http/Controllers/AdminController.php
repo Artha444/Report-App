@@ -43,6 +43,15 @@ class AdminController extends Controller
     {
         $validated = $request->validate(['team_id' => 'required|exists:teams,id']);
 
+        if ($report->status === 'pending') {
+            $report->update([
+                'status' => 'confirmed',
+                'confirmed_at' => now(),
+            ]);
+            $report->addLog('confirmed', 'Report confirmed by admin');
+            $report->user->notify(new ReportConfirmed($report));
+        }
+
         $report->update([
             'team_id' => $validated['team_id'],
             'status' => 'in_progress',

@@ -1,4 +1,4 @@
-import { Link, router, usePage } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import type { Auth } from '@/types/auth';
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
@@ -13,7 +13,9 @@ import {
     Megaphone,
     FileText,
     Users,
-    CircleUser
+    CircleUser,
+    CheckCircle2,
+    X
 } from 'lucide-react';
 
 type NavItem = {
@@ -23,10 +25,18 @@ type NavItem = {
 };
 
 export default function AppLayout({ children }: { children: ReactNode }) {
-    const { auth } = usePage().props as { auth: Auth };
+    const { auth, flash } = usePage().props as { auth: Auth, flash?: { success?: string, error?: string } };
     const { url } = usePage();
     const [sidebarOpen, setSidebarOpen] = useState(false);
-    const [logoutOpen, setLogoutOpen] = useState(false);
+    const [toast, setToast] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (flash?.success) {
+            setToast(flash.success);
+            const timer = setTimeout(() => setToast(null), 4000);
+            return () => clearTimeout(timer);
+        }
+    }, [flash]);
 
     useEffect(() => {
         if ('serviceWorker' in navigator) {
@@ -46,7 +56,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     // @ts-ignore
     const hasTeam = auth.teams && auth.teams.length > 0;
 
-    if (auth.user.role === 'student' || (['teacher', 'janitor', 'technician'].includes(auth.user.role) && !hasTeam)) {
+    if (auth.user.role === 'student' || ['teacher', 'janitor', 'technician'].includes(auth.user.role)) {
         mainNav.push(
             { href: '/reports/create', label: 'Lapor', icon: PlusSquare },
             { href: '/reports', label: 'Riwayat', icon: History },
@@ -107,7 +117,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                     </nav>
 
                     {/* Action Button CTA */}
-                    {(auth.user.role === 'student' || (['teacher', 'janitor', 'technician'].includes(auth.user.role) && !hasTeam)) && (
+                    {(auth.user.role === 'student' || ['teacher', 'janitor', 'technician'].includes(auth.user.role)) && (
                         <div className="mt-8 pt-6 border-t border-gray-100">
                             <Link
                                 href="/reports/create"
@@ -128,15 +138,15 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                         <Settings className="w-5 h-5 shrink-0" />
                         Settings
                     </Link>
-                    <button
-                        onClick={() => setLogoutOpen(true)}
+                    <Link
+                        href="/logout"
+                        method="post"
+                        as="button"
                         className="flex items-center gap-3.5 w-full px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-600 hover:bg-red-50 hover:text-red-600 transition-colors text-left"
                     >
                         <LogOut className="w-5 h-5 shrink-0" />
                         Logout
-                    </button>
-
-
+                    </Link>
                 </div>
             </div>
         );
@@ -187,6 +197,22 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                 </div>
 
                 {children}
+
+                {/* Toast Notification */}
+                {toast && (
+                    <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-top-5 fade-in duration-300">
+                        <div className="flex items-center gap-3 bg-white text-gray-800 px-5 py-3.5 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100">
+                            <CheckCircle2 className="w-5 h-5 text-green-500" />
+                            <p className="text-sm font-semibold">{toast}</p>
+                            <button 
+                                onClick={() => setToast(null)}
+                                className="p-1 hover:bg-gray-100 rounded-full transition-colors ml-1 text-gray-400 hover:text-gray-600"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
+                    </div>
+                )}
             </main>
 
             {logoutOpen && (

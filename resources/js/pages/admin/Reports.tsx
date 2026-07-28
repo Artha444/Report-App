@@ -48,6 +48,8 @@ export default function AdminReports() {
     const [activeTab, setActiveTab] = useState('all');
     const [assigningId, setAssigningId] = useState<number | null>(null);
     const [assignTeamId, setAssignTeamId] = useState('');
+    const [confirmingId, setConfirmingId] = useState<number | null>(null);
+    const [confirmTeamId, setConfirmTeamId] = useState('');
 
     const filtered = activeTab === 'all'
         ? reports.data
@@ -180,16 +182,62 @@ export default function AdminReports() {
 
                                         {report.status === 'pending' && (
                                             <>
-                                                <form onSubmit={(e) => { e.preventDefault(); post(`/admin/reports/${report.id}/confirm`); }}>
-                                                    <button
-                                                        type="submit"
-                                                        className="flex items-center gap-1 rounded-lg bg-green-50 px-2.5 py-1.5 text-xs font-medium text-green-700 transition hover:bg-green-100 active:scale-95"
-                                                    >
-                                                        <CheckCircle className="w-3 h-3" />
-                                                        Confirm
-                                                    </button>
-                                                </form>
+                                                <button
+                                                    onClick={() => setConfirmingId(report.id)}
+                                                    className="flex items-center gap-1 rounded-lg bg-green-50 px-2.5 py-1.5 text-xs font-medium text-green-700 transition hover:bg-green-100 active:scale-95"
+                                                >
+                                                    <CheckCircle className="w-3 h-3" />
+                                                    Confirm
+                                                </button>
                                                 <RejectDialog reportId={report.id} />
+
+                                                {confirmingId === report.id && (
+                                                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                                                        <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl text-left">
+                                                            <h3 className="text-lg font-bold text-gray-900">Konfirmasi Laporan</h3>
+                                                            <p className="text-sm text-gray-500 mt-1">
+                                                                Laporan akan dikonfirmasi. Anda juga bisa langsung menugaskannya ke tim.
+                                                            </p>
+                                                            <form onSubmit={(e) => {
+                                                                e.preventDefault();
+                                                                if (confirmTeamId) {
+                                                                    router.post(`/admin/reports/${report.id}/assign`, { team_id: confirmTeamId }, {
+                                                                        onSuccess: () => { setConfirmingId(null); setConfirmTeamId(''); }
+                                                                    });
+                                                                } else {
+                                                                    router.post(`/admin/reports/${report.id}/confirm`, {}, {
+                                                                        onSuccess: () => { setConfirmingId(null); setConfirmTeamId(''); }
+                                                                    });
+                                                                }
+                                                            }} className="mt-4">
+                                                                <select
+                                                                    value={confirmTeamId}
+                                                                    onChange={(e) => setConfirmTeamId(e.target.value)}
+                                                                    className="w-full text-sm border border-slate-300 rounded-xl p-3 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#0F172A]/20"
+                                                                >
+                                                                    <option value="">Pilih tim (opsional)</option>
+                                                                    {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                                                                </select>
+                                                                <div className="flex justify-end gap-2 mt-5">
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => { setConfirmingId(null); setConfirmTeamId(''); }}
+                                                                        className="px-4 py-2 text-sm font-medium text-gray-600 rounded-xl border border-slate-200 hover:bg-slate-50 transition"
+                                                                    >
+                                                                        Batal
+                                                                    </button>
+                                                                    <button
+                                                                        type="submit"
+                                                                        className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-[#0F172A] text-white rounded-xl transition hover:bg-[#1E293B] active:scale-95"
+                                                                    >
+                                                                        {confirmTeamId ? <Send className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
+                                                                        {confirmTeamId ? 'Konfirmasi & Assign' : 'Konfirmasi'}
+                                                                    </button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </>
                                         )}
 

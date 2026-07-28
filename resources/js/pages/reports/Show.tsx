@@ -1,7 +1,7 @@
 import AppLayout from '@/components/AppLayout';
 import StatusBadge from '@/components/report/StatusBadge';
 import type { Report } from '@/types/reports';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, usePage, router } from '@inertiajs/react';
 import type React from 'react';
 import type { Auth } from '@/types/auth';
 import { useState } from 'react';
@@ -31,188 +31,138 @@ function timeAgo(date: string): string {
     if (hours < 24) return `${hours}j lalu`;
     const days = Math.floor(hours / 24);
     if (days < 7) return `${days}h lalu`;
-    return new Date(date).toLocaleDateString('id-ID', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-    });
+    return new Date(date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
 function formatDate(date: string) {
     return new Date(date).toLocaleDateString('id-ID', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
+        day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
     });
 }
 
 export default function ReportShow({ report }: { report: Report }) {
-    const { auth } = usePage().props as { auth: Auth };
-    const backUrl =
-        auth.user.role === 'admin'
-            ? '/admin/reports'
-            : auth.user.role === 'teacher'
-              ? '/team/reports'
-              : '/reports';
-    const backLabel =
-        auth.user.role === 'admin'
-            ? 'All Reports'
-            : auth.user.role === 'teacher'
-              ? 'Team Reports'
-              : 'Riwayat';
-    const canReopen =
-        report.status === 'resolved' && report.user.id === auth.user.id;
+    const { auth, teams } = usePage().props as { auth: Auth, teams: any[] };
+    const backUrl = auth.user.role === 'admin' ? '/admin/reports'
+        : auth.user.role === 'teacher' ? '/team/reports'
+        : '/reports';
+    const backLabel = auth.user.role === 'admin' ? 'All Reports'
+        : auth.user.role === 'teacher' ? 'Team Reports'
+        : 'Riwayat';
+    const canReopen = report.status === 'resolved' && report.user.id === auth.user.id;
     const [reopenOpen, setReopenOpen] = useState(false);
     const [reopenFeedback, setReopenFeedback] = useState('');
     const [showLogs, setShowLogs] = useState(false);
 
+    const [confirmingOpen, setConfirmingOpen] = useState(false);
+    const [confirmTeamId, setConfirmTeamId] = useState('');
+    
+    const [rejectOpen, setRejectOpen] = useState(false);
+    const [rejectReason, setRejectReason] = useState('');
+
     const borderColor =
-        report.status === 'resolved'
-            ? 'border-l-green-500'
-            : report.status === 'in_progress'
-              ? 'border-l-orange-500'
-              : report.status === 'pending'
-                ? 'border-l-yellow-500'
-                : report.status === 'rejected'
-                  ? 'border-l-red-500'
-                  : 'border-l-blue-500';
+        report.status === 'resolved' ? 'border-l-green-500' :
+        report.status === 'in_progress' ? 'border-l-orange-500' :
+        report.status === 'pending' ? 'border-l-yellow-500' :
+        report.status === 'rejected' ? 'border-l-red-500' :
+        'border-l-blue-500';
 
     return (
-        <div className="mx-auto max-w-2xl space-y-5">
+        <div className="max-w-2xl mx-auto space-y-5">
             <Head title={report.title} />
 
             {/* Hero */}
             <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0F172A] via-[#1a2d4a] to-[#0F172A] p-6 sm:p-8">
-                <div className="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-white/5" />
-                <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-white/5" />
+                <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/5 rounded-full" />
+                <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-white/5 rounded-full" />
                 <div className="relative z-10">
                     <Link
                         href={backUrl}
-                        className="mb-3 inline-flex items-center gap-1 text-sm text-slate-400 transition-colors hover:text-white"
+                        className="inline-flex items-center gap-1 text-slate-400 text-sm hover:text-white transition-colors mb-3"
                     >
-                        <ArrowLeft className="h-4 w-4" />
+                        <ArrowLeft className="w-4 h-4" />
                         {backLabel}
                     </Link>
-                    <h1 className="text-xl font-bold text-white sm:text-2xl">
-                        {report.title}
-                    </h1>
-                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <h1 className="text-xl sm:text-2xl font-bold text-white">{report.title}</h1>
+                    <div className="flex items-center gap-2 mt-2 flex-wrap">
                         <StatusBadge status={report.status} />
-                        <span className="text-xs text-slate-400">
-                            {timeAgo(report.created_at)}
-                        </span>
+                        <span className="text-xs text-slate-400">{timeAgo(report.created_at)}</span>
                     </div>
                 </div>
             </div>
 
             {/* Info Card */}
-            <div
-                className={`rounded-2xl border-l-4 bg-white p-5 ${borderColor} space-y-4`}
-            >
+            <div className={`bg-white rounded-2xl p-5 border-l-4 ${borderColor} space-y-4`}>
                 <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100">
-                        <FileText className="h-4 w-4 text-slate-500" />
+                    <div className="w-9 h-9 bg-slate-100 rounded-xl flex items-center justify-center shrink-0">
+                        <FileText className="w-4 h-4 text-slate-500" />
                     </div>
                     <div>
-                        <p className="text-[11px] font-medium text-gray-400">
-                            Deskripsi
-                        </p>
-                        <p className="text-sm text-gray-900">
-                            {report.description}
-                        </p>
+                        <p className="text-[11px] text-gray-400 font-medium">Deskripsi</p>
+                        <p className="text-sm text-gray-900">{report.description}</p>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100">
-                        <MapPin className="h-4 w-4 text-slate-500" />
+                    <div className="w-9 h-9 bg-slate-100 rounded-xl flex items-center justify-center shrink-0">
+                        <MapPin className="w-4 h-4 text-slate-500" />
                     </div>
                     <div>
-                        <p className="text-[11px] font-medium text-gray-400">
-                            Lokasi
-                        </p>
-                        <p className="text-sm text-gray-900">
-                            {report.location}
-                        </p>
+                        <p className="text-[11px] text-gray-400 font-medium">Lokasi</p>
+                        <p className="text-sm text-gray-900">{report.location}</p>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100">
-                        <AlertTriangle className="h-4 w-4 text-slate-500" />
+                    <div className="w-9 h-9 bg-slate-100 rounded-xl flex items-center justify-center shrink-0">
+                        <AlertTriangle className="w-4 h-4 text-slate-500" />
                     </div>
                     <div>
-                        <p className="text-[11px] font-medium text-gray-400">
-                            Prioritas
-                        </p>
-                        <span
-                            className={`rounded-lg px-2 py-0.5 text-xs font-semibold ${
-                                report.priority === 'critical'
-                                    ? 'bg-red-50 text-red-600'
-                                    : report.priority === 'high'
-                                      ? 'bg-orange-50 text-orange-600'
-                                      : report.priority === 'medium'
-                                        ? 'bg-blue-50 text-blue-600'
-                                        : 'bg-gray-50 text-gray-500'
-                            }`}
-                        >
+                        <p className="text-[11px] text-gray-400 font-medium">Prioritas</p>
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-lg ${
+                            report.priority === 'critical' ? 'bg-red-50 text-red-600' :
+                            report.priority === 'high' ? 'bg-orange-50 text-orange-600' :
+                            report.priority === 'medium' ? 'bg-blue-50 text-blue-600' :
+                            'bg-gray-50 text-gray-500'
+                        }`}>
                             {report.priority}
                         </span>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100">
-                        <User className="h-4 w-4 text-slate-500" />
+                    <div className="w-9 h-9 bg-slate-100 rounded-xl flex items-center justify-center shrink-0">
+                        <User className="w-4 h-4 text-slate-500" />
                     </div>
                     <div>
-                        <p className="text-[11px] font-medium text-gray-400">
-                            Dilaporkan oleh
-                        </p>
-                        <p className="text-sm text-gray-900">
-                            {report.user.name}
-                        </p>
+                        <p className="text-[11px] text-gray-400 font-medium">Dilaporkan oleh</p>
+                        <p className="text-sm text-gray-900">{report.user.name}</p>
                     </div>
                 </div>
 
                 {report.team && (
                     <div className="flex items-center gap-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100">
-                            <Users className="h-4 w-4 text-slate-500" />
+                        <div className="w-9 h-9 bg-slate-100 rounded-xl flex items-center justify-center shrink-0">
+                            <Users className="w-4 h-4 text-slate-500" />
                         </div>
                         <div>
-                            <p className="text-[11px] font-medium text-gray-400">
-                                Ditugaskan ke
-                            </p>
-                            <p className="text-sm text-gray-900">
-                                {report.team.name}
-                            </p>
+                            <p className="text-[11px] text-gray-400 font-medium">Ditugaskan ke</p>
+                            <p className="text-sm text-gray-900">{report.team.name}</p>
                         </div>
                     </div>
                 )}
 
                 <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100">
-                        <Clock className="h-4 w-4 text-slate-500" />
+                    <div className="w-9 h-9 bg-slate-100 rounded-xl flex items-center justify-center shrink-0">
+                        <Clock className="w-4 h-4 text-slate-500" />
                     </div>
                     <div>
-                        <p className="text-[11px] font-medium text-gray-400">
-                            Waktu
-                        </p>
-                        <p className="text-sm text-gray-900">
-                            {formatDate(report.created_at)}
-                        </p>
+                        <p className="text-[11px] text-gray-400 font-medium">Waktu</p>
+                        <p className="text-sm text-gray-900">{formatDate(report.created_at)}</p>
                         {report.confirmed_at && (
-                            <p className="mt-0.5 text-xs text-gray-400">
-                                Dikonfirmasi: {formatDate(report.confirmed_at)}
-                            </p>
+                            <p className="text-xs text-gray-400 mt-0.5">Dikonfirmasi: {formatDate(report.confirmed_at)}</p>
                         )}
                         {report.resolved_at && (
-                            <p className="mt-0.5 text-xs text-gray-400">
-                                Selesai: {formatDate(report.resolved_at)}
-                            </p>
+                            <p className="text-xs text-gray-400 mt-0.5">Selesai: {formatDate(report.resolved_at)}</p>
                         )}
                     </div>
                 </div>
@@ -220,42 +170,32 @@ export default function ReportShow({ report }: { report: Report }) {
 
             {/* Rejection */}
             {report.rejection_reason && (
-                <div className="rounded-2xl border-l-4 border-l-red-500 bg-red-50 p-5">
-                    <div className="mb-2 flex items-center gap-2">
-                        <XCircle className="h-4 w-4 text-red-500" />
-                        <p className="text-sm font-semibold text-red-800">
-                            Ditolak
-                        </p>
+                <div className="bg-red-50 rounded-2xl p-5 border-l-4 border-l-red-500">
+                    <div className="flex items-center gap-2 mb-2">
+                        <XCircle className="w-4 h-4 text-red-500" />
+                        <p className="text-sm font-semibold text-red-800">Ditolak</p>
                     </div>
-                    <p className="text-sm text-red-700">
-                        {report.rejection_reason}
-                    </p>
+                    <p className="text-sm text-red-700">{report.rejection_reason}</p>
                 </div>
             )}
 
             {/* Resolution */}
             {report.resolution_notes && (
-                <div className="rounded-2xl border-l-4 border-l-green-500 bg-green-50 p-5">
-                    <div className="mb-2 flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                        <p className="text-sm font-semibold text-green-800">
-                            Selesai
-                        </p>
+                <div className="bg-green-50 rounded-2xl p-5 border-l-4 border-l-green-500">
+                    <div className="flex items-center gap-2 mb-2">
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                        <p className="text-sm font-semibold text-green-800">Selesai</p>
                     </div>
-                    <p className="text-sm text-green-700">
-                        {report.resolution_notes}
-                    </p>
+                    <p className="text-sm text-green-700">{report.resolution_notes}</p>
                 </div>
             )}
 
             {/* Resolution Evidence */}
             {report.resolution_evidence && (
-                <div className="rounded-2xl bg-white p-5">
-                    <div className="mb-3 flex items-center gap-2">
-                        <Camera className="h-4 w-4 text-gray-400" />
-                        <p className="text-sm font-semibold text-gray-900">
-                            Bukti Penyelesaian
-                        </p>
+                <div className="bg-white rounded-2xl p-5">
+                    <div className="flex items-center gap-2 mb-3">
+                        <Camera className="w-4 h-4 text-gray-400" />
+                        <p className="text-sm font-semibold text-gray-900">Bukti Penyelesaian</p>
                     </div>
                     <img
                         src={`/storage/${report.resolution_evidence}`}
@@ -267,36 +207,25 @@ export default function ReportShow({ report }: { report: Report }) {
 
             {/* User Feedback */}
             {report.user_feedback && (
-                <div className="rounded-2xl border-l-4 border-l-purple-500 bg-purple-50 p-5">
-                    <div className="mb-2 flex items-center gap-2">
-                        <MessageSquare className="h-4 w-4 text-purple-500" />
-                        <p className="text-sm font-semibold text-purple-800">
-                            Feedback (Reopen)
-                        </p>
+                <div className="bg-purple-50 rounded-2xl p-5 border-l-4 border-l-purple-500">
+                    <div className="flex items-center gap-2 mb-2">
+                        <MessageSquare className="w-4 h-4 text-purple-500" />
+                        <p className="text-sm font-semibold text-purple-800">Feedback (Reopen)</p>
                     </div>
-                    <p className="text-sm text-purple-700">
-                        {report.user_feedback}
-                    </p>
+                    <p className="text-sm text-purple-700">{report.user_feedback}</p>
                 </div>
             )}
 
             {/* Images */}
             {report.images.length > 0 && (
-                <div className="rounded-2xl bg-white p-5">
-                    <div className="mb-3 flex items-center gap-2">
-                        <Camera className="h-4 w-4 text-gray-400" />
-                        <p className="text-sm font-semibold text-gray-900">
-                            Foto Lampiran
-                        </p>
+                <div className="bg-white rounded-2xl p-5">
+                    <div className="flex items-center gap-2 mb-3">
+                        <Camera className="w-4 h-4 text-gray-400" />
+                        <p className="text-sm font-semibold text-gray-900">Foto Lampiran</p>
                     </div>
                     <div className="flex gap-2 overflow-x-auto pb-1">
                         {report.images.map((img) => (
-                            <img
-                                key={img.id}
-                                src={img.url}
-                                className="h-24 w-24 shrink-0 rounded-xl object-cover"
-                                alt=""
-                            />
+                            <img key={img.id} src={img.url} className="w-24 h-24 object-cover rounded-xl shrink-0" alt="" />
                         ))}
                     </div>
                 </div>
@@ -304,25 +233,17 @@ export default function ReportShow({ report }: { report: Report }) {
 
             {/* Activity Log */}
             {report.logs.length > 0 && (
-                <div className="rounded-2xl bg-white p-5">
+                <div className="bg-white rounded-2xl p-5">
                     <button
                         onClick={() => setShowLogs(!showLogs)}
-                        className="flex w-full items-center justify-between"
+                        className="flex items-center justify-between w-full"
                     >
                         <div className="flex items-center gap-2">
-                            <Clock className="h-4 w-4 text-gray-400" />
-                            <p className="text-sm font-semibold text-gray-900">
-                                Aktivitas
-                            </p>
-                            <span className="rounded-lg bg-gray-100 px-1.5 py-0.5 text-xs text-gray-400">
-                                {report.logs.length}
-                            </span>
+                            <Clock className="w-4 h-4 text-gray-400" />
+                            <p className="text-sm font-semibold text-gray-900">Aktivitas</p>
+                            <span className="text-xs text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-lg">{report.logs.length}</span>
                         </div>
-                        {showLogs ? (
-                            <ChevronUp className="h-4 w-4 text-gray-400" />
-                        ) : (
-                            <ChevronDown className="h-4 w-4 text-gray-400" />
-                        )}
+                        {showLogs ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
                     </button>
 
                     {showLogs && (
@@ -330,36 +251,29 @@ export default function ReportShow({ report }: { report: Report }) {
                             {report.logs.map((log, i) => (
                                 <div key={log.id} className="flex gap-3">
                                     <div className="flex flex-col items-center">
-                                        <div className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full bg-[#0F172A]" />
-                                        {i < report.logs.length - 1 && (
-                                            <div className="mt-1 w-px flex-1 bg-gray-200" />
-                                        )}
+                                        <div className="w-2.5 h-2.5 bg-[#0F172A] rounded-full mt-1.5 shrink-0" />
+                                        {i < report.logs.length - 1 && <div className="w-px flex-1 bg-gray-200 mt-1" />}
                                     </div>
-                                    <div className="w-full pb-4">
+                                    <div className="pb-4 w-full">
                                         <p className="text-sm text-gray-900">
-                                            <span className="font-semibold">
-                                                {log.user.name}
-                                            </span>{' '}
-                                            {log.action.replace(/_/g, ' ')}
+                                            <span className="font-semibold">{log.user.name}</span>
+                                            {' '}{log.action.replace(/_/g, ' ')}
                                         </p>
                                         {log.description && (
-                                            <div className="mt-2 rounded-xl border border-gray-100 bg-gray-50 p-3 text-sm text-gray-700">
+                                            <div className="mt-2 bg-gray-50 p-3 rounded-xl border border-gray-100 text-sm text-gray-700">
                                                 {log.description}
                                             </div>
                                         )}
-                                        {log.action === 'resolved' &&
-                                            report.resolution_evidence && (
-                                                <div className="mt-3">
-                                                    <img
-                                                        src={`/storage/${report.resolution_evidence}`}
-                                                        alt="Bukti Penyelesaian"
-                                                        className="w-full max-w-sm rounded-xl border border-gray-100 object-cover shadow-sm"
-                                                    />
-                                                </div>
-                                            )}
-                                        <p className="mt-2 text-[11px] text-gray-400">
-                                            {timeAgo(log.created_at)}
-                                        </p>
+                                        {log.action === 'resolved' && report.resolution_evidence && (
+                                            <div className="mt-3">
+                                                <img 
+                                                    src={`/storage/${report.resolution_evidence}`} 
+                                                    alt="Bukti Penyelesaian" 
+                                                    className="w-full max-w-sm rounded-xl object-cover border border-gray-100 shadow-sm"
+                                                />
+                                            </div>
+                                        )}
+                                        <p className="text-[11px] text-gray-400 mt-2">{timeAgo(log.created_at)}</p>
                                     </div>
                                 </div>
                             ))}
@@ -367,75 +281,169 @@ export default function ReportShow({ report }: { report: Report }) {
                     )}
                 </div>
             )}
+            {/* Admin Actions */}
+            {auth.user.role === 'admin' && report.status === 'pending' && (
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => setConfirmingOpen(true)}
+                        className="flex-1 flex items-center justify-center gap-2 bg-green-50 text-green-700 border border-green-100 py-3.5 rounded-2xl font-semibold text-sm hover:bg-green-100 transition-all active:scale-[0.98]"
+                    >
+                        <CheckCircle className="w-4 h-4" />
+                        Konfirmasi Laporan
+                    </button>
+                    <button
+                        onClick={() => setRejectOpen(true)}
+                        className="flex-1 flex items-center justify-center gap-2 bg-red-50 text-red-700 border border-red-100 py-3.5 rounded-2xl font-semibold text-sm hover:bg-red-100 transition-all active:scale-[0.98]"
+                    >
+                        <XCircle className="w-4 h-4" />
+                        Tolak Laporan
+                    </button>
+                </div>
+            )}
 
             {/* Reopen */}
             {canReopen && (
                 <button
                     onClick={() => setReopenOpen(true)}
-                    className="flex w-full items-center justify-center gap-2 rounded-2xl bg-purple-600 py-3.5 text-sm font-semibold text-white transition-all hover:bg-purple-700 active:scale-[0.98]"
+                    className="w-full flex items-center justify-center gap-2 bg-purple-600 text-white py-3.5 rounded-2xl font-semibold text-sm hover:bg-purple-700 transition-all active:scale-[0.98]"
                 >
-                    <Send className="h-4 w-4" />
+                    <Send className="w-4 h-4" />
                     Buka Kembali Laporan
                 </button>
             )}
 
             {/* Reopen Modal */}
             {reopenOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-                    <div className="w-full max-w-md rounded-2xl bg-white p-6">
-                        <h3 className="mb-1 text-lg font-bold text-gray-900">
-                            Buka Kembali Laporan
-                        </h3>
-                        <p className="mb-4 text-sm text-gray-500">
-                            Jelaskan mengapa penyelesaian belum memuaskan
-                        </p>
-                        <form
-                            onSubmit={(e) => {
-                                e.preventDefault();
-                                fetch(`/reports/${report.id}/reopen`, {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'X-CSRF-TOKEN':
-                                            document
-                                                .querySelector(
-                                                    'meta[name="csrf-token"]',
-                                                )
-                                                ?.getAttribute('content') ?? '',
-                                        'X-Inertia': 'true',
-                                    },
-                                    body: JSON.stringify({
-                                        user_feedback: reopenFeedback,
-                                    }),
-                                }).then(() => {
-                                    setReopenOpen(false);
-                                    window.location.reload();
-                                });
-                            }}
-                        >
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl p-6 w-full max-w-md">
+                        <h3 className="text-lg font-bold text-gray-900 mb-1">Buka Kembali Laporan</h3>
+                        <p className="text-sm text-gray-500 mb-4">Jelaskan mengapa penyelesaian belum memuaskan</p>
+                        <form onSubmit={(e) => {
+                            e.preventDefault();
+                            fetch(`/reports/${report.id}/reopen`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '',
+                                    'X-Inertia': 'true',
+                                },
+                                body: JSON.stringify({ user_feedback: reopenFeedback }),
+                            }).then(() => {
+                                setReopenOpen(false);
+                                window.location.reload();
+                            });
+                        }}>
                             <textarea
-                                className="w-full resize-none rounded-xl border border-gray-200 p-3 text-sm transition-all placeholder:text-gray-400 focus:border-purple-400 focus:ring-2 focus:ring-purple-200 focus:outline-none"
+                                className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200 focus:border-purple-400 transition-all resize-none placeholder:text-gray-400"
                                 rows={4}
                                 placeholder="Tulis alasan kamu..."
                                 value={reopenFeedback}
-                                onChange={(e) =>
-                                    setReopenFeedback(e.target.value)
-                                }
+                                onChange={(e) => setReopenFeedback(e.target.value)}
                                 required
                             />
-                            <div className="mt-4 flex gap-2">
+                            <div className="flex gap-2 mt-4">
                                 <button
                                     type="button"
                                     onClick={() => setReopenOpen(false)}
-                                    className="flex-1 rounded-xl bg-gray-100 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
+                                    className="flex-1 py-2.5 text-sm font-medium text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
                                 >
                                     Batal
                                 </button>
                                 <button
                                     type="submit"
-                                    className="flex-1 rounded-xl bg-purple-600 py-2.5 text-sm font-medium text-white transition-colors hover:bg-purple-700"
+                                    className="flex-1 py-2.5 text-sm font-medium text-white bg-purple-600 rounded-xl hover:bg-purple-700 transition-colors"
                                 >
                                     Kirim
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Confirm Modal */}
+            {confirmingOpen && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl text-left">
+                        <h3 className="text-lg font-bold text-gray-900">Konfirmasi Laporan</h3>
+                        <p className="text-sm text-gray-500 mt-1">
+                            Laporan akan dikonfirmasi. Anda juga bisa langsung menugaskannya ke tim.
+                        </p>
+                        <form onSubmit={(e) => {
+                            e.preventDefault();
+                            if (confirmTeamId) {
+                                router.post(`/admin/reports/${report.id}/assign`, { team_id: confirmTeamId }, {
+                                    onSuccess: () => { setConfirmingOpen(false); setConfirmTeamId(''); }
+                                });
+                            } else {
+                                router.post(`/admin/reports/${report.id}/confirm`, {}, {
+                                    onSuccess: () => { setConfirmingOpen(false); setConfirmTeamId(''); }
+                                });
+                            }
+                        }} className="mt-4">
+                            <select
+                                value={confirmTeamId}
+                                onChange={(e) => setConfirmTeamId(e.target.value)}
+                                className="w-full text-sm border border-slate-300 rounded-xl p-3 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#0F172A]/20"
+                            >
+                                <option value="">Pilih tim (opsional)</option>
+                                {teams && teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                            </select>
+                            <div className="flex justify-end gap-2 mt-5">
+                                <button
+                                    type="button"
+                                    onClick={() => { setConfirmingOpen(false); setConfirmTeamId(''); }}
+                                    className="px-4 py-2 text-sm font-medium text-gray-600 rounded-xl border border-slate-200 hover:bg-slate-50 transition"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-[#0F172A] text-white rounded-xl transition hover:bg-[#1E293B] active:scale-95"
+                                >
+                                    {confirmTeamId ? <Send className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
+                                    {confirmTeamId ? 'Konfirmasi & Assign' : 'Konfirmasi'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Reject Modal */}
+            {rejectOpen && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl text-left">
+                        <h3 className="text-lg font-bold text-gray-900">Tolak Laporan</h3>
+                        <p className="text-sm text-gray-500 mt-1">Berikan alasan penolakan laporan ini.</p>
+                        <form onSubmit={(e) => {
+                            e.preventDefault();
+                            router.post(`/admin/reports/${report.id}/reject`, { rejection_reason: rejectReason }, {
+                                onSuccess: () => { setRejectOpen(false); setRejectReason(''); }
+                            });
+                        }} className="mt-4">
+                            <textarea
+                                className="w-full rounded-xl border border-slate-300 bg-slate-50 p-3 text-sm text-slate-900 placeholder-slate-400 focus:border-red-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/20 resize-none"
+                                rows={4}
+                                placeholder="Alasan penolakan..."
+                                value={rejectReason}
+                                onChange={(e) => setRejectReason(e.target.value)}
+                                required
+                            />
+                            <div className="flex justify-end gap-2 mt-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setRejectOpen(false)}
+                                    className="px-4 py-2 text-sm font-medium text-gray-600 rounded-xl border border-slate-200 hover:bg-slate-50 transition"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-red-600 text-white rounded-xl transition hover:bg-red-700 active:scale-95 disabled:opacity-50"
+                                >
+                                    <XCircle className="w-4 h-4" />
+                                    Tolak Laporan
                                 </button>
                             </div>
                         </form>
