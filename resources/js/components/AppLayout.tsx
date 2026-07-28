@@ -1,4 +1,4 @@
-import { Link, usePage } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import type { Auth } from '@/types/auth';
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
@@ -26,6 +26,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     const { auth } = usePage().props as { auth: Auth };
     const { url } = usePage();
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [logoutOpen, setLogoutOpen] = useState(false);
 
     useEffect(() => {
         if ('serviceWorker' in navigator) {
@@ -127,15 +128,37 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                         <Settings className="w-5 h-5 shrink-0" />
                         Settings
                     </Link>
-                    <Link
-                        href="/logout"
-                        method="post"
-                        as="button"
+                    <button
+                        onClick={() => setLogoutOpen(true)}
                         className="flex items-center gap-3.5 w-full px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-600 hover:bg-red-50 hover:text-red-600 transition-colors text-left"
                     >
                         <LogOut className="w-5 h-5 shrink-0" />
                         Logout
-                    </Link>
+                    </button>
+
+                    {logoutOpen && (
+                        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 transition starting:opacity-0">
+                            <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl transition starting:opacity-0 starting:scale-95">
+                                <h3 className="text-lg font-bold text-gray-900">Logout</h3>
+                                <p className="text-sm text-gray-500 mt-1">Apakah kamu yakin ingin logout?</p>
+                                <div className="flex justify-end gap-2 mt-4">
+                                    <button
+                                        onClick={() => setLogoutOpen(false)}
+                                        className="px-4 py-2 text-sm font-medium text-gray-600 rounded-xl border border-slate-200 hover:bg-slate-50 transition"
+                                    >
+                                        Batal
+                                    </button>
+                                    <button
+                                        onClick={() => router.post('/logout')}
+                                        className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-red-600 text-white rounded-xl transition hover:bg-red-700 active:scale-95"
+                                    >
+                                        <LogOut className="w-4 h-4" />
+                                        Logout
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         );
