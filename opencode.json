@@ -1,14 +1,11 @@
 {
     "$schema": "https://opencode.ai/config.json",
+    "plugin": ["@dietrichgebert/ponytail"],
     "mcp": {
         "laravel-boost": {
             "type": "local",
             "enabled": true,
-            "command": [
-                "php",
-                "artisan",
-                "boost:mcp"
-            ]
+            "command": ["php", "artisan", "boost:mcp"]
         }
     }
 }
