@@ -69,6 +69,7 @@ class ReportController extends Controller
 
         return Inertia::render('reports/Show', [
             'report' => $report,
+            'teams' => auth()->user()->isAdmin() ? \App\Models\Team::all() : [],
         ]);
     }
 

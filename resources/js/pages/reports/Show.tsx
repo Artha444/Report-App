@@ -1,7 +1,7 @@
 import AppLayout from '@/components/AppLayout';
 import StatusBadge from '@/components/report/StatusBadge';
 import type { Report } from '@/types/reports';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, usePage, router } from '@inertiajs/react';
 import type React from 'react';
 import type { Auth } from '@/types/auth';
 import { useState } from 'react';
@@ -41,7 +41,7 @@ function formatDate(date: string) {
 }
 
 export default function ReportShow({ report }: { report: Report }) {
-    const { auth } = usePage().props as { auth: Auth };
+    const { auth, teams } = usePage().props as { auth: Auth, teams: any[] };
     const backUrl = auth.user.role === 'admin' ? '/admin/reports'
         : auth.user.role === 'teacher' ? '/team/reports'
         : '/reports';
@@ -52,6 +52,12 @@ export default function ReportShow({ report }: { report: Report }) {
     const [reopenOpen, setReopenOpen] = useState(false);
     const [reopenFeedback, setReopenFeedback] = useState('');
     const [showLogs, setShowLogs] = useState(false);
+
+    const [confirmingOpen, setConfirmingOpen] = useState(false);
+    const [confirmTeamId, setConfirmTeamId] = useState('');
+    
+    const [rejectOpen, setRejectOpen] = useState(false);
+    const [rejectReason, setRejectReason] = useState('');
 
     const borderColor =
         report.status === 'resolved' ? 'border-l-green-500' :
@@ -275,7 +281,25 @@ export default function ReportShow({ report }: { report: Report }) {
                     )}
                 </div>
             )}
-            halo
+            {/* Admin Actions */}
+            {auth.user.role === 'admin' && report.status === 'pending' && (
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => setConfirmingOpen(true)}
+                        className="flex-1 flex items-center justify-center gap-2 bg-green-50 text-green-700 border border-green-100 py-3.5 rounded-2xl font-semibold text-sm hover:bg-green-100 transition-all active:scale-[0.98]"
+                    >
+                        <CheckCircle className="w-4 h-4" />
+                        Konfirmasi Laporan
+                    </button>
+                    <button
+                        onClick={() => setRejectOpen(true)}
+                        className="flex-1 flex items-center justify-center gap-2 bg-red-50 text-red-700 border border-red-100 py-3.5 rounded-2xl font-semibold text-sm hover:bg-red-100 transition-all active:scale-[0.98]"
+                    >
+                        <XCircle className="w-4 h-4" />
+                        Tolak Laporan
+                    </button>
+                </div>
+            )}
 
             {/* Reopen */}
             {canReopen && (
@@ -330,6 +354,96 @@ export default function ReportShow({ report }: { report: Report }) {
                                     className="flex-1 py-2.5 text-sm font-medium text-white bg-purple-600 rounded-xl hover:bg-purple-700 transition-colors"
                                 >
                                     Kirim
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Confirm Modal */}
+            {confirmingOpen && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl text-left">
+                        <h3 className="text-lg font-bold text-gray-900">Konfirmasi Laporan</h3>
+                        <p className="text-sm text-gray-500 mt-1">
+                            Laporan akan dikonfirmasi. Anda juga bisa langsung menugaskannya ke tim.
+                        </p>
+                        <form onSubmit={(e) => {
+                            e.preventDefault();
+                            if (confirmTeamId) {
+                                router.post(`/admin/reports/${report.id}/assign`, { team_id: confirmTeamId }, {
+                                    onSuccess: () => { setConfirmingOpen(false); setConfirmTeamId(''); }
+                                });
+                            } else {
+                                router.post(`/admin/reports/${report.id}/confirm`, {}, {
+                                    onSuccess: () => { setConfirmingOpen(false); setConfirmTeamId(''); }
+                                });
+                            }
+                        }} className="mt-4">
+                            <select
+                                value={confirmTeamId}
+                                onChange={(e) => setConfirmTeamId(e.target.value)}
+                                className="w-full text-sm border border-slate-300 rounded-xl p-3 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#0F172A]/20"
+                            >
+                                <option value="">Pilih tim (opsional)</option>
+                                {teams && teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                            </select>
+                            <div className="flex justify-end gap-2 mt-5">
+                                <button
+                                    type="button"
+                                    onClick={() => { setConfirmingOpen(false); setConfirmTeamId(''); }}
+                                    className="px-4 py-2 text-sm font-medium text-gray-600 rounded-xl border border-slate-200 hover:bg-slate-50 transition"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-[#0F172A] text-white rounded-xl transition hover:bg-[#1E293B] active:scale-95"
+                                >
+                                    {confirmTeamId ? <Send className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
+                                    {confirmTeamId ? 'Konfirmasi & Assign' : 'Konfirmasi'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Reject Modal */}
+            {rejectOpen && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl text-left">
+                        <h3 className="text-lg font-bold text-gray-900">Tolak Laporan</h3>
+                        <p className="text-sm text-gray-500 mt-1">Berikan alasan penolakan laporan ini.</p>
+                        <form onSubmit={(e) => {
+                            e.preventDefault();
+                            router.post(`/admin/reports/${report.id}/reject`, { rejection_reason: rejectReason }, {
+                                onSuccess: () => { setRejectOpen(false); setRejectReason(''); }
+                            });
+                        }} className="mt-4">
+                            <textarea
+                                className="w-full rounded-xl border border-slate-300 bg-slate-50 p-3 text-sm text-slate-900 placeholder-slate-400 focus:border-red-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/20 resize-none"
+                                rows={4}
+                                placeholder="Alasan penolakan..."
+                                value={rejectReason}
+                                onChange={(e) => setRejectReason(e.target.value)}
+                                required
+                            />
+                            <div className="flex justify-end gap-2 mt-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setRejectOpen(false)}
+                                    className="px-4 py-2 text-sm font-medium text-gray-600 rounded-xl border border-slate-200 hover:bg-slate-50 transition"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-red-600 text-white rounded-xl transition hover:bg-red-700 active:scale-95 disabled:opacity-50"
+                                >
+                                    <XCircle className="w-4 h-4" />
+                                    Tolak Laporan
                                 </button>
                             </div>
                         </form>

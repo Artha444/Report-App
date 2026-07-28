@@ -21,6 +21,14 @@ class Report extends Model
         'confirmed_at', 'resolved_at',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'confirmed_at' => 'datetime',
+            'resolved_at' => 'datetime',
+        ];
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
