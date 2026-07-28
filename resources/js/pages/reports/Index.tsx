@@ -4,7 +4,6 @@ import type React from 'react';
 import { useState } from 'react';
 import {
     Search,
-    SlidersHorizontal,
     Folder,
     MoreHorizontal,
     RotateCw,
@@ -13,7 +12,7 @@ import {
     MapPin,
     ChevronRight,
     ChevronLeft,
-    FileText
+    FileText,
 } from 'lucide-react';
 
 type Report = {
@@ -38,25 +37,44 @@ type Props = {
 
 export default function ReportIndex({ reports }: Props) {
     const [searchQuery, setSearchQuery] = useState('');
-    const [activeFilter, setActiveFilter] = useState<'all' | 'latest' | 'priority'>('all');
+    const [activeFilter, setActiveFilter] = useState<
+        'all' | 'pending' | 'in_progress' | 'resolved' | 'rejected'
+    >('all');
 
     usePoll(5000, { only: ['reports'] });
 
-    // Filter berdasarkan kata kunci pencarian
+    // Filter berdasarkan kata kunci pencarian + status
     const filteredReports = reports.data.filter((report) => {
         const matchesSearch =
             report.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (report.location && report.location.toLowerCase().includes(searchQuery.toLowerCase())) ||
-            (report.description && report.description.toLowerCase().includes(searchQuery.toLowerCase()));
+            (report.location &&
+                report.location
+                    .toLowerCase()
+                    .includes(searchQuery.toLowerCase())) ||
+            (report.description &&
+                report.description
+                    .toLowerCase()
+                    .includes(searchQuery.toLowerCase()));
 
-        return matchesSearch;
+        const matchesFilter =
+            activeFilter === 'all' ||
+            report.status === activeFilter ||
+            (activeFilter === 'in_progress' && report.status === 'confirmed');
+
+        return matchesSearch && matchesFilter;
     });
 
     // Hitung statistik status
     const totalCount = reports.total || reports.data.length;
-    const pendingCount = reports.data.filter((r) => r.status === 'pending').length;
-    const inProgressCount = reports.data.filter((r) => r.status === 'in_progress' || r.status === 'confirmed').length;
-    const resolvedCount = reports.data.filter((r) => r.status === 'resolved').length;
+    const pendingCount = reports.data.filter(
+        (r) => r.status === 'pending',
+    ).length;
+    const inProgressCount = reports.data.filter(
+        (r) => r.status === 'in_progress' || r.status === 'confirmed',
+    ).length;
+    const resolvedCount = reports.data.filter(
+        (r) => r.status === 'resolved',
+    ).length;
 
     const formatDate = (dateStr: string) => {
         try {
@@ -71,136 +89,132 @@ export default function ReportIndex({ reports }: Props) {
     };
 
     return (
-        <div className="space-y-6 max-w-[1200px] mx-auto pb-12">
+        <div className="mx-auto max-w-[1200px] space-y-6 pb-12">
             {/* Top Bar: Search Input */}
             <div className="flex items-center justify-between gap-4">
                 <div className="relative w-full max-w-sm">
-                    <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <Search className="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-gray-400" />
                     <input
                         type="text"
                         placeholder="Cari laporan..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full bg-gray-100/80 border-none rounded-xl py-2 pl-10 pr-4 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-gray-900/10 placeholder-gray-400 transition-all"
+                        className="w-full rounded-xl border-none bg-gray-100/80 py-2 pr-4 pl-10 text-xs font-medium placeholder-gray-400 transition-all focus:ring-2 focus:ring-gray-900/10 focus:outline-none"
                     />
                 </div>
             </div>
 
             {/* Header Section */}
             <div>
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
-                         Laporan
+                <h1 className="text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl">
+                    Riwayat Laporan
                 </h1>
-                <p className="text-xs sm:text-sm text-gray-500 mt-1">
-                    Pantau status dan perkembangan semua laporan Anda secara real-time.
+                <p className="mt-1 text-xs text-gray-500 sm:text-sm">
+                    Pantau status dan perkembangan semua laporan Anda secara
+                    real-time.
                 </p>
             </div>
 
             {/* Summary Stat Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
                 {/* Total Laporan */}
-                <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+                <div className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
                     <div>
-                        <p className="text-xs font-medium text-gray-500">Total Laporan</p>
-                        <p className="text-2xl sm:text-3xl font-extrabold text-gray-900 mt-1">{totalCount}</p>
+                        <p className="text-xs font-medium text-gray-500">
+                            Total Laporan
+                        </p>
+                        <p className="mt-1 text-2xl font-extrabold text-gray-900 sm:text-3xl">
+                            {totalCount}
+                        </p>
                     </div>
-                    <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center text-gray-700">
-                        <Folder className="w-5 h-5" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-gray-700">
+                        <Folder className="h-5 w-5" />
                     </div>
                 </div>
 
                 {/* Pending */}
-                <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+                <div className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
                     <div>
-                        <p className="text-xs font-medium text-gray-500">Pending</p>
-                        <p className="text-2xl sm:text-3xl font-extrabold text-gray-900 mt-1">{pendingCount}</p>
+                        <p className="text-xs font-medium text-gray-500">
+                            Pending
+                        </p>
+                        <p className="mt-1 text-2xl font-extrabold text-gray-900 sm:text-3xl">
+                            {pendingCount}
+                        </p>
                     </div>
-                    <div className="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600">
-                        <MoreHorizontal className="w-5 h-5" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+                        <MoreHorizontal className="h-5 w-5" />
                     </div>
                 </div>
 
                 {/* Proses */}
-                <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+                <div className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
                     <div>
-                        <p className="text-xs font-medium text-gray-500">Proses</p>
-                        <p className="text-2xl sm:text-3xl font-extrabold text-gray-900 mt-1">{inProgressCount}</p>
+                        <p className="text-xs font-medium text-gray-500">
+                            Proses
+                        </p>
+                        <p className="mt-1 text-2xl font-extrabold text-gray-900 sm:text-3xl">
+                            {inProgressCount}
+                        </p>
                     </div>
-                    <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
-                        <RotateCw className="w-5 h-5" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                        <RotateCw className="h-5 w-5" />
                     </div>
                 </div>
 
                 {/* Selesai */}
-                <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+                <div className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
                     <div>
-                        <p className="text-xs font-medium text-gray-500">Selesai</p>
-                        <p className="text-2xl sm:text-3xl font-extrabold text-gray-900 mt-1">{resolvedCount}</p>
+                        <p className="text-xs font-medium text-gray-500">
+                            Selesai
+                        </p>
+                        <p className="mt-1 text-2xl font-extrabold text-gray-900 sm:text-3xl">
+                            {resolvedCount}
+                        </p>
                     </div>
-                    <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600">
-                        <CheckCircle2 className="w-5 h-5" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                        <CheckCircle2 className="h-5 w-5" />
                     </div>
                 </div>
             </div>
 
-            {/* Filter Tabs & Options */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-2">
-                <div className="flex items-center gap-2">
+            {/* Filter Tabs */}
+            <div className="flex items-center gap-2 overflow-x-auto pt-2">
+                {(
+                    [
+                        ['all', 'Semua'],
+                        ['pending', 'Pending'],
+                        ['in_progress', 'Proses'],
+                        ['resolved', 'Selesai'],
+                        ['rejected', 'Ditolak'],
+                    ] as const
+                ).map(([value, label]) => (
                     <button
-                        onClick={() => setActiveFilter('all')}
-                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                            activeFilter === 'all'
+                        key={value}
+                        onClick={() => setActiveFilter(value)}
+                        className={`shrink-0 rounded-xl px-4 py-2 text-xs font-bold transition-all ${
+                            activeFilter === value
                                 ? 'bg-black text-white shadow-sm'
-                                : 'bg-white text-gray-600 border border-gray-100 hover:bg-gray-50'
+                                : 'border border-gray-100 bg-white text-gray-600 hover:bg-gray-50'
                         }`}
                     >
-                        Semua
+                        {label}
                     </button>
-                    <button
-                        onClick={() => setActiveFilter('latest')}
-                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                            activeFilter === 'latest'
-                                ? 'bg-black text-white shadow-sm'
-                                : 'bg-white text-gray-600 border border-gray-100 hover:bg-gray-50'
-                        }`}
-                    >
-                        Terbaru
-                    </button>
-                    <button
-                        onClick={() => setActiveFilter('priority')}
-                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                            activeFilter === 'priority'
-                                ? 'bg-black text-white shadow-sm'
-                                : 'bg-white text-gray-600 border border-gray-100 hover:bg-gray-50'
-                        }`}
-                    >
-                        Prioritas
-                    </button>
-                </div>
-
-                <button className="inline-flex items-center gap-2 text-xs font-semibold text-gray-600 hover:text-gray-900 transition-colors">
-                    <SlidersHorizontal className="w-3.5 h-3.5" />
-                    <span>Filter Lanjutan</span>
-                </button>
-            </div>
-
-            <div className="relative mb-4 ">
-                <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input
-                        type="text"
-                        placeholder="Cari laporan..."
-                        className="w-full bg-white-50 border border-gray-100 rounded-xl py-2.5 pl-10 pr-4 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-gray-900/10 transition-all"
-                    />
+                ))}
             </div>
 
             {/* Report Cards List */}
             {filteredReports.length === 0 ? (
-                <div className="bg-white rounded-3xl border border-gray-100 p-12 text-center">
-                    <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-3 text-gray-400">
-                        <FileText className="w-6 h-6" />
+                <div className="rounded-3xl border border-gray-100 bg-white p-12 text-center">
+                    <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-50 text-gray-400">
+                        <FileText className="h-6 w-6" />
                     </div>
-                    <p className="font-bold text-gray-900 text-sm">Tidak ada laporan ditemukan</p>
-                    <p className="text-xs text-gray-400 mt-1">Coba sesuaikan kata kunci atau filter pencarian Anda.</p>
+                    <p className="text-sm font-bold text-gray-900">
+                        Tidak ada laporan ditemukan
+                    </p>
+                    <p className="mt-1 text-xs text-gray-400">
+                        Coba sesuaikan kata kunci atau filter pencarian Anda.
+                    </p>
                 </div>
             ) : (
                 <div className="space-y-4">
@@ -208,44 +222,49 @@ export default function ReportIndex({ reports }: Props) {
                         <Link
                             key={report.id}
                             href={`/reports/${report.id}`}
-                            className="block bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-all group"
+                            className="group block rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition-all hover:shadow-md"
                         >
                             <div className="flex flex-col gap-3">
                                 {/* Title and Status Badge */}
                                 <div className="flex items-start justify-between gap-4">
-                                    <h3 className="font-bold text-gray-900 text-base group-hover:text-black transition-colors">
+                                    <h3 className="text-base font-bold text-gray-900 transition-colors group-hover:text-black">
                                         {report.title}
                                     </h3>
                                     <span
-                                        className={`shrink-0 px-3 py-1 rounded-full text-[11px] font-semibold capitalize ${
+                                        className={`shrink-0 rounded-full px-3 py-1 text-[11px] font-semibold capitalize ${
                                             report.status === 'pending'
                                                 ? 'bg-amber-100/70 text-amber-800'
-                                                : report.status === 'in_progress' || report.status === 'confirmed'
-                                                ? 'bg-blue-100/70 text-blue-700'
-                                                : report.status === 'resolved'
-                                                ? 'bg-emerald-100/70 text-emerald-700'
-                                                : 'bg-rose-100/70 text-rose-700'
+                                                : report.status ===
+                                                        'in_progress' ||
+                                                    report.status ===
+                                                        'confirmed'
+                                                  ? 'bg-blue-100/70 text-blue-700'
+                                                  : report.status === 'resolved'
+                                                    ? 'bg-emerald-100/70 text-emerald-700'
+                                                    : 'bg-rose-100/70 text-rose-700'
                                         }`}
                                     >
                                         {report.status === 'in_progress'
                                             ? 'Proses'
                                             : report.status === 'resolved'
-                                            ? 'Selesai'
-                                            : report.status === 'pending'
-                                            ? 'Pending'
-                                            : report.status}
+                                              ? 'Selesai'
+                                              : report.status === 'pending'
+                                                ? 'Pending'
+                                                : report.status}
                                     </span>
                                 </div>
 
                                 {/* Meta Info: Date and Location */}
-                                <div className="flex items-center gap-4 text-xs text-gray-500 font-medium flex-wrap">
+                                <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-gray-500">
                                     <div className="flex items-center gap-1.5">
-                                        <Calendar className="w-3.5 h-3.5 text-gray-400" />
-                                        <span>{formatDate(report.created_at)}</span>
+                                        <Calendar className="h-3.5 w-3.5 text-gray-400" />
+                                        <span>
+                                            {formatDate(report.created_at)}
+                                        </span>
                                     </div>
                                     {report.location && (
                                         <div className="flex items-center gap-1.5">
-                                            <MapPin className="w-3.5 h-3.5 text-gray-400" />
+                                            <MapPin className="h-3.5 w-3.5 text-gray-400" />
                                             <span>{report.location}</span>
                                         </div>
                                     )}
@@ -253,19 +272,19 @@ export default function ReportIndex({ reports }: Props) {
 
                                 {/* Short Description */}
                                 {report.description && (
-                                    <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed">
+                                    <p className="line-clamp-2 text-xs leading-relaxed text-gray-600">
                                         {report.description}
                                     </p>
                                 )}
 
                                 {/* Footer / Extra Info Note & Action Arrow */}
-                                <div className="pt-3 mt-1 border-t border-gray-50 flex items-center justify-between">
+                                <div className="mt-1 flex items-center justify-between border-t border-gray-50 pt-3">
                                     <div className="flex items-center gap-2">
                                         {report.assignee_avatar && (
                                             <img
                                                 src={report.assignee_avatar}
                                                 alt="Assignee"
-                                                className="w-5 h-5 rounded-full object-cover"
+                                                className="h-5 w-5 rounded-full object-cover"
                                             />
                                         )}
                                         {report.latest_note && (
@@ -275,8 +294,8 @@ export default function ReportIndex({ reports }: Props) {
                                         )}
                                     </div>
 
-                                    <div className="flex items-center gap-1 text-gray-400 group-hover:text-gray-900 group-hover:translate-x-0.5 transition-all ml-auto">
-                                        <ChevronRight className="w-4 h-4" />
+                                    <div className="ml-auto flex items-center gap-1 text-gray-400 transition-all group-hover:translate-x-0.5 group-hover:text-gray-900">
+                                        <ChevronRight className="h-4 w-4" />
                                     </div>
                                 </div>
                             </div>
@@ -286,24 +305,35 @@ export default function ReportIndex({ reports }: Props) {
             )}
 
             {/* Pagination Footer */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
+            <div className="flex flex-col items-center justify-between gap-4 pt-4 sm:flex-row">
                 <p className="text-xs font-medium text-gray-500">
-                    Menampilkan {filteredReports.length} dari {totalCount} laporan
+                    Menampilkan {filteredReports.length} dari {totalCount}{' '}
+                    laporan
                 </p>
 
                 {reports.links && reports.links.length > 3 && (
                     <div className="flex items-center gap-1">
                         {reports.links.map((link, idx) => {
-                            const isPrevious = link.label.includes('Previous') || link.label.includes('&laquo;');
-                            const isNext = link.label.includes('Next') || link.label.includes('&raquo;');
+                            const isPrevious =
+                                link.label.includes('Previous') ||
+                                link.label.includes('&laquo;');
+                            const isNext =
+                                link.label.includes('Next') ||
+                                link.label.includes('&raquo;');
 
                             if (!link.url) {
                                 return (
                                     <span
                                         key={idx}
-                                        className="w-8 h-8 flex items-center justify-center rounded-lg text-xs text-gray-300 font-medium"
+                                        className="flex h-8 w-8 items-center justify-center rounded-lg text-xs font-medium text-gray-300"
                                     >
-                                        {isPrevious ? <ChevronLeft className="w-4 h-4" /> : isNext ? <ChevronRight className="w-4 h-4" /> : link.label}
+                                        {isPrevious ? (
+                                            <ChevronLeft className="h-4 w-4" />
+                                        ) : isNext ? (
+                                            <ChevronRight className="h-4 w-4" />
+                                        ) : (
+                                            link.label
+                                        )}
                                     </span>
                                 );
                             }
@@ -312,18 +342,22 @@ export default function ReportIndex({ reports }: Props) {
                                 <Link
                                     key={idx}
                                     href={link.url}
-                                    className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all ${
+                                    className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-bold transition-all ${
                                         link.active
                                             ? 'bg-black text-white'
-                                            : 'bg-white border border-gray-100 text-gray-700 hover:bg-gray-50'
+                                            : 'border border-gray-100 bg-white text-gray-700 hover:bg-gray-50'
                                     }`}
                                 >
                                     {isPrevious ? (
-                                        <ChevronLeft className="w-4 h-4" />
+                                        <ChevronLeft className="h-4 w-4" />
                                     ) : isNext ? (
-                                        <ChevronRight className="w-4 h-4" />
+                                        <ChevronRight className="h-4 w-4" />
                                     ) : (
-                                        <span dangerouslySetInnerHTML={{ __html: link.label }} />
+                                        <span
+                                            dangerouslySetInnerHTML={{
+                                                __html: link.label,
+                                            }}
+                                        />
                                     )}
                                 </Link>
                             );

@@ -136,36 +136,14 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                         Logout
                     </button>
 
-                    {logoutOpen && (
-                        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 transition starting:opacity-0">
-                            <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl transition starting:opacity-0 starting:scale-95">
-                                <h3 className="text-lg font-bold text-gray-900">Logout</h3>
-                                <p className="text-sm text-gray-500 mt-1">Apakah kamu yakin ingin logout?</p>
-                                <div className="flex justify-end gap-2 mt-4">
-                                    <button
-                                        onClick={() => setLogoutOpen(false)}
-                                        className="px-4 py-2 text-sm font-medium text-gray-600 rounded-xl border border-slate-200 hover:bg-slate-50 transition"
-                                    >
-                                        Batal
-                                    </button>
-                                    <button
-                                        onClick={() => router.post('/logout')}
-                                        className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-red-600 text-white rounded-xl transition hover:bg-red-700 active:scale-95"
-                                    >
-                                        <LogOut className="w-4 h-4" />
-                                        Logout
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
+
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="flex min-h-screen bg-[#F8FAFC]">
+        <div className="flex min-h-screen bg-[#F8FAFC] overflow-x-hidden">
             {/* Desktop Sidebar */}
             <aside className="hidden md:flex w-64 bg-white border-r border-gray-100 flex-col fixed h-screen z-30">
                 <SidebarContent />
@@ -189,7 +167,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             </aside>
 
             {/* Main Content Area */}
-            <main className="flex-1 md:ml-64 p-4 sm:p-8 max-w-[1400px]">
+            <main className="flex-1 min-w-0 md:ml-64 p-4 sm:p-8 max-w-[1400px]">
                 {/* Mobile Topbar */}
                 <div className="flex items-center justify-between mb-6 md:hidden bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
                     <button
@@ -210,6 +188,30 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
                 {children}
             </main>
+
+            {logoutOpen && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 transition starting:opacity-0">
+                    <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl transition starting:opacity-0 starting:scale-95">
+                        <h3 className="text-lg font-bold text-gray-900">Logout</h3>
+                        <p className="text-sm text-gray-500 mt-1">Apakah kamu yakin ingin logout?</p>
+                        <div className="flex justify-end gap-2 mt-4">
+                            <button
+                                onClick={() => setLogoutOpen(false)}
+                                className="px-4 py-2 text-sm font-medium text-gray-600 rounded-xl border border-slate-200 hover:bg-slate-50 transition"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                onClick={() => router.post('/logout')}
+                                className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-red-600 text-white rounded-xl transition hover:bg-red-700 active:scale-95"
+                            >
+                                <LogOut className="w-4 h-4" />
+                                Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
