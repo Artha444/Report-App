@@ -42,14 +42,17 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     ];
 
-    if (auth.user.role === 'student' || auth.user.role === 'teacher') {
+    // @ts-ignore
+    const hasTeam = auth.teams && auth.teams.length > 0;
+
+    if (auth.user.role === 'student' || (['teacher', 'janitor', 'technician'].includes(auth.user.role) && !hasTeam)) {
         mainNav.push(
             { href: '/reports/create', label: 'Lapor', icon: PlusSquare },
             { href: '/reports', label: 'Riwayat', icon: History },
         );
     }
 
-    if (auth.user.role === 'teacher') {
+    if (['teacher', 'janitor', 'technician'].includes(auth.user.role) && hasTeam) {
         mainNav.push({ href: '/team/reports', label: 'Laporan Tim', icon: History });
     }
 
@@ -103,7 +106,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                     </nav>
 
                     {/* Action Button CTA */}
-                    {(auth.user.role === 'student' || auth.user.role === 'teacher') && (
+                    {(auth.user.role === 'student' || (['teacher', 'janitor', 'technician'].includes(auth.user.role) && !hasTeam)) && (
                         <div className="mt-8 pt-6 border-t border-gray-100">
                             <Link
                                 href="/reports/create"

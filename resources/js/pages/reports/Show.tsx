@@ -248,13 +248,26 @@ export default function ReportShow({ report }: { report: Report }) {
                                         <div className="w-2.5 h-2.5 bg-[#0F172A] rounded-full mt-1.5 shrink-0" />
                                         {i < report.logs.length - 1 && <div className="w-px flex-1 bg-gray-200 mt-1" />}
                                     </div>
-                                    <div className="pb-4">
+                                    <div className="pb-4 w-full">
                                         <p className="text-sm text-gray-900">
                                             <span className="font-semibold">{log.user.name}</span>
                                             {' '}{log.action.replace(/_/g, ' ')}
                                         </p>
-                                        {log.description && <p className="text-xs text-gray-500 mt-0.5">{log.description}</p>}
-                                        <p className="text-[11px] text-gray-400 mt-1">{timeAgo(log.created_at)}</p>
+                                        {log.description && (
+                                            <div className="mt-2 bg-gray-50 p-3 rounded-xl border border-gray-100 text-sm text-gray-700">
+                                                {log.description}
+                                            </div>
+                                        )}
+                                        {log.action === 'resolved' && report.resolution_evidence && (
+                                            <div className="mt-3">
+                                                <img 
+                                                    src={`/storage/${report.resolution_evidence}`} 
+                                                    alt="Bukti Penyelesaian" 
+                                                    className="w-full max-w-sm rounded-xl object-cover border border-gray-100 shadow-sm"
+                                                />
+                                            </div>
+                                        )}
+                                        <p className="text-[11px] text-gray-400 mt-2">{timeAgo(log.created_at)}</p>
                                     </div>
                                 </div>
                             ))}

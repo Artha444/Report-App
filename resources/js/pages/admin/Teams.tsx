@@ -1,5 +1,5 @@
 import AppLayout from '@/components/AppLayout';
-import { useForm, usePage } from '@inertiajs/react';
+import { useForm, usePage, router } from '@inertiajs/react';
 import type React from 'react';
 import { useState } from 'react';
 import {
@@ -52,8 +52,7 @@ export default function AdminTeams() {
     }
 
     function addMemberToTeam(teamId: number) {
-        post(`/admin/teams/${teamId}/members`, {
-            data: { user_id: memberUserId },
+        router.post(`/admin/teams/${teamId}/members`, { user_id: memberUserId }, {
             onSuccess: () => {
                 setAddMember(null);
                 setMemberUserId('');
@@ -204,7 +203,7 @@ export default function AdminTeams() {
                                                     <button
                                                         onClick={() => {
                                                             if (confirm('Apakah Anda yakin ingin menghapus tim ini?')) {
-                                                                destroy(`/admin/teams/${team.id}`);
+                                                                router.delete(`/admin/teams/${team.id}`);
                                                             }
                                                         }}
                                                         className="p-1.5 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors"
@@ -226,7 +225,7 @@ export default function AdminTeams() {
                                                             title="Keluarkan dari tim"
                                                             onClick={() => {
                                                                 if (confirm(`Keluarkan ${m.name} dari tim ${team.name}?`)) {
-                                                                    destroy(`/admin/teams/${team.id}/members/${m.id}`);
+                                                                    router.delete(`/admin/teams/${team.id}/members/${m.id}`);
                                                                 }
                                                             }}
                                                         >

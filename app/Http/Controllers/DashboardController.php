@@ -10,17 +10,21 @@ use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    public function index(): Response
+    public function index(): Response | \Illuminate\Http\RedirectResponse
     {
         $user = Auth::user();
 
-        $data = match ($user->role) {
-            'admin' => $this->adminDashboard(),
-            'teacher' => $this->teacherDashboard(),
-            default => $this->studentDashboard(),
-        };
+        if ($user->role === 'admin') {
+            return Inertia::render('dashboard/Index', $this->adminDashboard());
+        }
 
-        return Inertia::render('dashboard/Index', $data);
+        if (in_array($user->role, ['teacher', 'janitor', 'technician'])) {
+            if ($user->teams()->exists()) {
+                return redirect()->route('team.dashboard');
+            }
+        }
+
+        return Inertia::render('dashboard/Index', $this->studentDashboard());
     }
 
     private function studentDashboard(): array
@@ -36,19 +40,6 @@ class DashboardController extends Controller
             'rejectedCount' => (clone $query)->rejected()->count(),
             'recentReports' => Report::where('user_id', $userId)
                 ->latest()->take(5)->get(),
-        ];
-    }
-
-    private function teacherDashboard(): array
-    {
-        $teamIds = Auth::user()->teams()->pluck('teams.id');
-
-        return [
-            'assignedCount' => Report::whereIn('team_id', $teamIds)->where('status', 'in_progress')->count(),
-            'resolvedCount' => Report::whereIn('team_id', $teamIds)->where('status', 'resolved')->count(),
-            'recentReports' => Report::whereIn('team_id', $teamIds)
-                ->with('team')->latest()->take(5)->get(),
-            'teams' => Auth::user()->teams,
         ];
     }
 
