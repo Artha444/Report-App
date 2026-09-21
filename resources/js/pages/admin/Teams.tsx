@@ -244,7 +244,9 @@ export default function AdminTeams() {
                                                             className="border border-gray-200 rounded-xl px-3 py-2 text-xs sm:text-sm font-semibold focus:outline-none focus:border-gray-400 bg-white shadow-sm w-full sm:w-56"
                                                         >
                                                             <option value="" disabled>Pilih Staf / Guru</option>
-                                                            {staffMembers.map(staff => (
+                                                            {staffMembers
+                                                                .filter(staff => !team.members.some(m => m.id === staff.id))
+                                                                .map(staff => (
                                                                 <option key={staff.id} value={staff.id}>{staff.name} ({staff.role})</option>
                                                             ))}
                                                         </select>

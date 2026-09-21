@@ -96,6 +96,10 @@ class AdminController extends Controller
 
     public function updateRole(Request $request, User $user): RedirectResponse
     {
+        if ($user->id === auth()->id()) {
+            return back()->with('error', 'Anda tidak dapat mengubah role Anda sendiri.');
+        }
+
         if ($user->role === 'student') {
             return back()->with('error', 'Role siswa tidak dapat diubah.');
         }

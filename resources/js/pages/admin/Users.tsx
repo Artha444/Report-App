@@ -216,6 +216,8 @@ export default function AdminUsers() {
 
 function RoleSelector({ user }: { user: User }) {
     const [open, setOpen] = useState(false);
+    const { auth } = usePage().props as any;
+    const isCurrentUser = user.id === auth.user.id;
 
     function changeRole(role: string) {
         router.patch(`/admin/users/${user.id}/role`, { role }, {
@@ -237,22 +239,23 @@ function RoleSelector({ user }: { user: User }) {
         user.role === 'technician' ? 'Teknisi' : 'Siswa';
 
     const isStudent = user.role === 'student';
+    const isDisabled = isStudent || isCurrentUser;
 
     return (
         <div className={`relative inline-block text-left w-full md:w-36 ${open ? 'z-50' : 'z-10'}`}>
             <button
                 type="button"
-                onClick={() => !isStudent && setOpen((prev) => !prev)}
-                disabled={isStudent}
+                onClick={() => !isDisabled && setOpen((prev) => !prev)}
+                disabled={isDisabled}
                 className={`w-full flex items-center justify-between gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold uppercase tracking-wider transition-all ${
                     roleColors[user.role] ?? roleColors.student
-                } ${isStudent ? 'opacity-70 cursor-not-allowed' : 'hover:opacity-90 active:scale-[0.98] shadow-sm'}`}
+                } ${isDisabled ? 'opacity-70 cursor-not-allowed' : 'hover:opacity-90 active:scale-[0.98] shadow-sm'}`}
             >
                 <div className="flex items-center gap-1.5">
                     <Shield className="w-3.5 h-3.5 opacity-70" />
                     <span>{currentRoleLabel}</span>
                 </div>
-                {!isStudent && <ChevronDown className="w-3.5 h-3.5 opacity-60" />}
+                {!isDisabled && <ChevronDown className="w-3.5 h-3.5 opacity-60" />}
             </button>
 
             {open && (

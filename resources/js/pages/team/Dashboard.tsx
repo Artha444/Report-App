@@ -76,7 +76,16 @@ export default function TeamDashboard() {
         });
     };
 
-    const teamName = auth.teams && auth.teams.length > 0 ? auth.teams[0].name : auth.user.name.split(' ')[0];
+    let teamNames = '';
+    if (auth.teams && auth.teams.length > 0) {
+        if (auth.teams.length === 1) {
+            teamNames = auth.teams[0].name;
+        } else if (auth.teams.length === 2) {
+            teamNames = `${auth.teams[0].name} & ${auth.teams[1].name}`;
+        } else {
+            teamNames = `${auth.teams.slice(0, -1).map(t => t.name).join(', ')} & ${auth.teams[auth.teams.length - 1].name}`;
+        }
+    }
 
     return (
         <div className="space-y-6 relative">
@@ -84,10 +93,10 @@ export default function TeamDashboard() {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                     <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
-                        Halo, Tim {teamName}!
+                        Halo, {auth.user.name.split(' ')[0]}!
                     </h1>
                     <p className="text-sm text-gray-500 mt-1">
-                        Selamat datang di Dashboard Tim. Periksa tugas yang perlu Anda selesaikan.
+                        Selamat datang di Dashboard Tim. {teamNames && <span className="font-medium text-gray-700">Kamu berada di Tim {teamNames}.</span>} Periksa tugas yang perlu Anda selesaikan.
                     </p>
                 </div>
                 <div className="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-gray-100 shadow-sm text-xs font-semibold text-gray-700 self-start sm:self-auto">
