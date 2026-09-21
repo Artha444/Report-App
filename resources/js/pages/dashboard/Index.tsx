@@ -7,6 +7,12 @@ import {
     ChevronRight,
     Megaphone,
     Calendar,
+    Users,
+    FileText,
+    CheckCircle2,
+    XCircle,
+    Clock,
+    AlertCircle,
 } from 'lucide-react';
 import type React from 'react';
 import AppLayout from '@/components/AppLayout';
@@ -356,7 +362,269 @@ function TeacherDashboard() {
 }
 
 function AdminDashboard() {
-    return <StudentDashboard />;
+    const {
+        auth,
+        pendingCount,
+        confirmedCount,
+        rejectedCount,
+        resolvedCount,
+        totalReports,
+        recentReports,
+        teams,
+    } = usePage().props as {
+        auth: { user: { name: string } };
+        pendingCount: number;
+        confirmedCount: number;
+        rejectedCount: number;
+        resolvedCount: number;
+        totalReports: number;
+        recentReports: {
+            id: number;
+            title: string;
+            status: string;
+            priority: string;
+            created_at: string;
+            user: { name: string };
+            team?: { name: string };
+        }[];
+        teams: any[];
+    };
+
+    const formattedDate = new Date().toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+    });
+
+    return (
+        <div className="space-y-6">
+            {/* Top Greeting Header */}
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h1 className="text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl">
+                        Halo, {auth.user.name.split(' ')[0]}!
+                    </h1>
+                    <p className="mt-1 text-sm text-gray-500">
+                        Selamat datang di Dashboard Admin. Pantau seluruh aktivitas dan laporan sistem.
+                    </p>
+                </div>
+                <div className="inline-flex items-center gap-2 self-start rounded-xl border border-gray-100 bg-white px-4 py-2 text-xs font-semibold text-gray-700 shadow-sm sm:self-auto">
+                    <Calendar className="h-4 w-4 text-gray-500" />
+                    <span>{formattedDate}</span>
+                </div>
+            </div>
+
+            {/* Layout Main Grid (Left 2/3, Right 1/3) */}
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                {/* Left Column Area */}
+                <div className="space-y-6 lg:col-span-2">
+                    {/* Main Banner Hero */}
+                    <div className="relative overflow-hidden rounded-3xl bg-[#111827] p-6 text-white sm:p-8">
+                        {/* Background SVG / Visual Graphic Shape */}
+                        <div className="pointer-events-none absolute top-0 right-0 bottom-0 flex w-1/2 items-center justify-center opacity-10">
+                            <svg
+                                className="h-full w-full text-white"
+                                viewBox="0 0 200 200"
+                                fill="currentColor"
+                            >
+                                <path
+                                    d="M45,-62.5C57.4,-53.1,65.8,-38.8,70.2,-23.4C74.6,-8,75,8.5,69.5,23.3C64,38.1,52.6,51.2,38.8,60.1C25,69,8.8,73.7,-6.8,72.4C-22.4,71.1,-37.4,63.8,-49.8,53.2C-62.2,42.6,-72,28.7,-74.6,13.4C-77.2,-1.9,-72.6,-18.6,-63.9,-31.8C-55.2,-45,-42.4,-54.7,-28.9,-63.4C-15.4,-72,-1.2,-79.6,13.6,-77.3C28.4,-75,41.2,-62.8,45,-62.5Z"
+                                    transform="translate(100 100)"
+                                />
+                            </svg>
+                        </div>
+
+                        <div className="relative z-10 max-w-lg">
+                            <h2 className="text-xl leading-snug font-bold sm:text-2xl">
+                                Ikhtisar Sistem Hari Ini
+                            </h2>
+                            <p className="mt-2 text-xs leading-relaxed text-gray-300 sm:text-sm">
+                                Pantau dan kelola semua laporan yang masuk. Pastikan semua tiket ditugaskan ke tim terkait agar dapat segera ditindaklanjuti.
+                            </p>
+                            <Link
+                                href="/admin/reports"
+                                className="mt-6 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-xs font-bold text-gray-900 shadow-sm transition-all hover:bg-gray-100 active:scale-95 sm:text-sm"
+                            >
+                                <FileText className="h-4 w-4 text-gray-900" />
+                                Kelola Laporan
+                            </Link>
+                        </div>
+                    </div>
+
+                    {/* Grid Stats */}
+                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                        <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+                            <p className="text-[10px] font-bold tracking-wider text-gray-400 uppercase">
+                                PENDING
+                            </p>
+                            <div className="mt-2 flex items-baseline gap-1">
+                                <span className="text-2xl font-extrabold text-amber-600">
+                                    {pendingCount || 0}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+                            <p className="text-[10px] font-bold tracking-wider text-gray-400 uppercase">
+                                DITUGASKAN
+                            </p>
+                            <div className="mt-2 flex items-baseline gap-1">
+                                <span className="text-2xl font-extrabold text-blue-600">
+                                    {confirmedCount || 0}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+                            <p className="text-[10px] font-bold tracking-wider text-gray-400 uppercase">
+                                SELESAI
+                            </p>
+                            <div className="mt-2 flex items-baseline gap-1">
+                                <span className="text-2xl font-extrabold text-emerald-600">
+                                    {resolvedCount || 0}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+                            <p className="text-[10px] font-bold tracking-wider text-gray-400 uppercase">
+                                DITOLAK
+                            </p>
+                            <div className="mt-2 flex items-baseline gap-1">
+                                <span className="text-2xl font-extrabold text-rose-600">
+                                    {rejectedCount || 0}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Table Laporan Terbaru */}
+                    <div className="overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm">
+                        <div className="flex items-center justify-between border-b border-gray-50 p-6">
+                            <h3 className="text-base font-bold text-gray-900">
+                                Laporan Terbaru Masuk
+                            </h3>
+                            <Link
+                                href="/admin/reports"
+                                className="text-xs font-bold text-gray-600 transition-colors hover:text-gray-900"
+                            >
+                                Lihat Semua
+                            </Link>
+                        </div>
+
+                        <div className="overflow-x-auto">
+                            <table className="w-full border-collapse text-left">
+                                <thead>
+                                    <tr className="bg-gray-50/70 text-[10px] font-bold tracking-wider text-gray-400 uppercase">
+                                        <th className="px-6 py-3">LAPORAN</th>
+                                        <th className="px-6 py-3">PELAPOR</th>
+                                        <th className="px-6 py-3">STATUS</th>
+                                        <th className="px-4 py-3"></th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-50 text-xs">
+                                    {recentReports.length === 0 ? (
+                                        <tr>
+                                            <td
+                                                colSpan={4}
+                                                className="py-8 text-center text-gray-400"
+                                            >
+                                                Belum ada laporan terbaru.
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        recentReports.map((report) => (
+                                            <tr
+                                                key={report.id}
+                                                className="group transition-colors hover:bg-gray-50/50"
+                                            >
+                                                <td className="px-6 py-4">
+                                                    <p className="font-bold text-gray-900">#RP-{report.id}</p>
+                                                    <p className="mt-0.5 text-gray-600 font-medium truncate max-w-[150px]">{report.title}</p>
+                                                </td>
+                                                <td className="px-6 py-4 font-medium text-gray-800">
+                                                    {report.user?.name}
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <span
+                                                        className={`inline-block rounded-full px-3 py-1 text-[11px] font-semibold capitalize ${
+                                                            report.status === 'resolved' ? 'bg-emerald-50 text-emerald-600' :
+                                                            report.status === 'in_progress' ? 'bg-blue-50 text-blue-600' :
+                                                            report.status === 'confirmed' ? 'bg-indigo-50 text-indigo-600' :
+                                                            report.status === 'pending' ? 'bg-amber-50 text-amber-600' :
+                                                            'bg-rose-50 text-rose-600'
+                                                        }`}
+                                                    >
+                                                        {report.status}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-4 text-right">
+                                                    <Link
+                                                        href={`/reports/${report.id}`}
+                                                    >
+                                                        <ChevronRight className="inline-block h-4 w-4 text-gray-300 transition-colors group-hover:text-gray-600" />
+                                                    </Link>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Right Column / Sidebar Area */}
+                <div className="space-y-6">
+                    {/* Widget: Tim Internal */}
+                    <div className="space-y-4 rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
+                        <div className="flex items-center gap-3">
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gray-100">
+                                <Users className="h-5 w-5 text-gray-700" />
+                            </div>
+                            <h3 className="text-base font-bold text-gray-900">
+                                Manajemen Tim
+                            </h3>
+                        </div>
+
+                        <p className="text-xs leading-relaxed text-gray-500">
+                            Ada <strong>{teams.length}</strong> tim internal yang terdaftar di sistem.
+                        </p>
+
+                        <div className="mt-4 pt-4 border-t border-gray-50">
+                            <Link href="/admin/teams" className="text-sm font-semibold text-gray-700 hover:text-gray-900 transition-colors flex items-center justify-between">
+                                Kelola Anggota Tim
+                                <ChevronRight className="w-4 h-4" />
+                            </Link>
+                        </div>
+                    </div>
+                    
+                    {/* Widget: Kelola Pengguna */}
+                    <div className="space-y-4 rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
+                        <div className="flex items-center gap-3">
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gray-100">
+                                <AlertCircle className="h-5 w-5 text-gray-700" />
+                            </div>
+                            <h3 className="text-base font-bold text-gray-900">
+                                Kelola Pengguna
+                            </h3>
+                        </div>
+
+                        <p className="text-xs leading-relaxed text-gray-500">
+                            Atur peranan tiap akun (Guru, Janitor, Teknisi) agar dapat ditugaskan ke laporan tertentu.
+                        </p>
+
+                        <div className="mt-4 pt-4 border-t border-gray-50">
+                            <Link href="/admin/users" className="text-sm font-semibold text-gray-700 hover:text-gray-900 transition-colors flex items-center justify-between">
+                                Daftar Pengguna
+                                <ChevronRight className="w-4 h-4" />
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
 }
 
 Dashboard.layout = (page: React.ReactNode) => <AppLayout>{page}</AppLayout>;

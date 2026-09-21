@@ -1,4 +1,4 @@
-import { Link, usePage } from '@inertiajs/react';
+import { Link, usePage, router } from '@inertiajs/react';
 import type { Auth } from '@/types/auth';
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
@@ -29,6 +29,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     const { url } = usePage();
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [toast, setToast] = useState<string | null>(null);
+    const [logoutOpen, setLogoutOpen] = useState(false);
 
     useEffect(() => {
         if (flash?.success) {
@@ -77,7 +78,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
     function isActive(href: string): boolean {
         if (href === '/dashboard') {
-            return url === '/dashboard' || url === '/';
+            return url === '/dashboard' || url === '/' || url === '/team/dashboard';
         }
         if (url === href) return true;
         if (!url.startsWith(href)) return false;
@@ -138,15 +139,13 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                         <Settings className="w-5 h-5 shrink-0" />
                         Settings
                     </Link>
-                    <Link
-                        href="/logout"
-                        method="post"
-                        as="button"
+                    <button
+                        onClick={() => setLogoutOpen(true)}
                         className="flex items-center gap-3.5 w-full px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-600 hover:bg-red-50 hover:text-red-600 transition-colors text-left"
                     >
                         <LogOut className="w-5 h-5 shrink-0" />
                         Logout
-                    </Link>
+                    </button>
                 </div>
             </div>
         );

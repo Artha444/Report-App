@@ -1,5 +1,5 @@
 import AppLayout from '@/components/AppLayout';
-import { useForm, usePage, Link } from '@inertiajs/react';
+import { useForm, usePage, Link, router } from '@inertiajs/react';
 import type React from 'react';
 import { useState } from 'react';
 import {
@@ -90,9 +90,9 @@ export default function AdminUsers() {
                     <p className="text-xs text-gray-400 mt-1">Coba sesuaikan kata kunci pencarian Anda.</p>
                 </div>
             ) : (
-                <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+                <div className="bg-white rounded-3xl border border-gray-100 shadow-sm">
                     {/* Desktop Table View */}
-                    <div className="hidden md:block overflow-x-auto">
+                    <div className="hidden md:block overflow-visible">
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-gray-50/70 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
@@ -215,12 +215,10 @@ export default function AdminUsers() {
 }
 
 function RoleSelector({ user }: { user: User }) {
-    const { patch } = useForm();
     const [open, setOpen] = useState(false);
 
     function changeRole(role: string) {
-        patch(`/admin/users/${user.id}/role`, {
-            data: { role },
+        router.patch(`/admin/users/${user.id}/role`, { role }, {
             preserveScroll: true,
             onSuccess: () => setOpen(false)
         });
@@ -234,22 +232,27 @@ function RoleSelector({ user }: { user: User }) {
 
     const currentRoleLabel =
         user.role === 'admin' ? 'Admin' :
-        user.role === 'teacher' ? 'Guru' : 'Siswa';
+        user.role === 'teacher' ? 'Guru' :
+        user.role === 'janitor' ? 'Janitor' :
+        user.role === 'technician' ? 'Teknisi' : 'Siswa';
+
+    const isStudent = user.role === 'student';
 
     return (
-        <div className="relative inline-block text-left w-full md:w-36">
+        <div className={`relative inline-block text-left w-full md:w-36 ${open ? 'z-50' : 'z-10'}`}>
             <button
                 type="button"
-                onClick={() => setOpen((prev) => !prev)}
+                onClick={() => !isStudent && setOpen((prev) => !prev)}
+                disabled={isStudent}
                 className={`w-full flex items-center justify-between gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold uppercase tracking-wider transition-all ${
                     roleColors[user.role] ?? roleColors.student
-                } hover:opacity-90 active:scale-[0.98] shadow-sm`}
+                } ${isStudent ? 'opacity-70 cursor-not-allowed' : 'hover:opacity-90 active:scale-[0.98] shadow-sm'}`}
             >
                 <div className="flex items-center gap-1.5">
                     <Shield className="w-3.5 h-3.5 opacity-70" />
                     <span>{currentRoleLabel}</span>
                 </div>
-                <ChevronDown className="w-3.5 h-3.5 opacity-60" />
+                {!isStudent && <ChevronDown className="w-3.5 h-3.5 opacity-60" />}
             </button>
 
             {open && (
@@ -259,27 +262,42 @@ function RoleSelector({ user }: { user: User }) {
                         onClick={() => setOpen(false)}
                     />
                     <div className="absolute z-50 mt-1.5 w-full md:w-36 bg-white border border-gray-100 rounded-xl shadow-lg p-1 space-y-0.5 animate-in fade-in-50 slide-in-from-top-1 duration-100">
-                        <button
-                            type="button"
-                            onClick={() => changeRole('student')}
-                            className="w-full text-left px-3 py-2 rounded-lg text-xs font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
-                        >
-                            Siswa
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => changeRole('teacher')}
-                            className="w-full text-left px-3 py-2 rounded-lg text-xs font-semibold text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors"
-                        >
-                            Guru
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => changeRole('admin')}
-                            className="w-full text-left px-3 py-2 rounded-lg text-xs font-semibold text-gray-700 hover:bg-[#0F172A]/10 hover:text-[#0F172A] transition-colors"
-                        >
-                            Admin
-                        </button>
+                        {user.role !== 'teacher' && (
+                            <button
+                                type="button"
+                                onClick={() => changeRole('teacher')}
+                                className="w-full text-left px-3 py-2 rounded-lg text-xs font-semibold text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors"
+                            >
+                                Guru
+                            </button>
+                        )}
+                        {user.role !== 'janitor' && (
+                            <button
+                                type="button"
+                                onClick={() => changeRole('janitor')}
+                                className="w-full text-left px-3 py-2 rounded-lg text-xs font-semibold text-gray-700 hover:bg-green-50 hover:text-green-600 transition-colors"
+                            >
+                                Janitor
+                            </button>
+                        )}
+                        {user.role !== 'technician' && (
+                            <button
+                                type="button"
+                                onClick={() => changeRole('technician')}
+                                className="w-full text-left px-3 py-2 rounded-lg text-xs font-semibold text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors"
+                            >
+                                Teknisi
+                            </button>
+                        )}
+                        {user.role !== 'admin' && (
+                            <button
+                                type="button"
+                                onClick={() => changeRole('admin')}
+                                className="w-full text-left px-3 py-2 rounded-lg text-xs font-semibold text-gray-700 hover:bg-[#0F172A]/10 hover:text-[#0F172A] transition-colors"
+                            >
+                                Admin
+                            </button>
+                        )}
                     </div>
                 </>
             )}

@@ -18,8 +18,46 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
 
         User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+    'name' => 'Admin',
+    'email' => 'admin@test.com',
+    'role' => 'admin',
+]);
+User::factory()->create([
+    'name' => 'Joko',
+    'email' => 'teacher@test.com',
+    'role' => 'teacher',
+]);
+User::factory()->create([
+    'name' => 'Teddy',
+    'email' => 'teacher2@test.com',
+    'role' => 'teacher',
+]);
+User::factory()->create([
+    'name' => 'Budi',
+    'email' => 'teacher3@test.com',
+    'role' => 'teacher',
+]);
+User::factory()->create([
+    'name' => 'Slamet',
+    'email' => 'janitor@test.com',
+    'role' => 'janitor',
+]);
+User::factory()->create([
+    'name' => 'Udin',
+    'email' => 'janitor2@test.com',
+    'role' => 'janitor',
+]);
+User::factory()->create([
+    'name' => 'Ucup',
+    'email' => 'technician@test.com',
+    'role' => 'technician',
+]);
+User::factory()->create([
+    'name' => 'Artha',
+    'email' => 'student@test.com',
+    'role' => 'student',
+]);
+
+
     }
 }

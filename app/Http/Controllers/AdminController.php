@@ -96,8 +96,12 @@ class AdminController extends Controller
 
     public function updateRole(Request $request, User $user): RedirectResponse
     {
+        if ($user->role === 'student') {
+            return back()->with('error', 'Role siswa tidak dapat diubah.');
+        }
+
         $validated = $request->validate([
-            'role' => 'required|in:student,teacher,admin',
+            'role' => 'required|in:student,teacher,janitor,technician,admin',
         ]);
 
         $user->update(['role' => $validated['role']]);

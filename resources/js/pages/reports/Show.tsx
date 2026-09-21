@@ -66,6 +66,15 @@ export default function ReportShow({ report }: { report: Report }) {
         report.status === 'rejected' ? 'border-l-red-500' :
         'border-l-blue-500';
 
+    const handleBack = (e: React.MouseEvent) => {
+        e.preventDefault();
+        if (window.history.length > 1 && document.referrer.includes(window.location.host)) {
+            window.history.back();
+        } else {
+            router.visit(backUrl);
+        }
+    };
+
     return (
         <div className="max-w-2xl mx-auto space-y-5">
             <Head title={report.title} />
@@ -75,13 +84,14 @@ export default function ReportShow({ report }: { report: Report }) {
                 <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/5 rounded-full" />
                 <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-white/5 rounded-full" />
                 <div className="relative z-10">
-                    <Link
+                    <a
                         href={backUrl}
-                        className="inline-flex items-center gap-1 text-slate-400 text-sm hover:text-white transition-colors mb-3"
+                        onClick={handleBack}
+                        className="inline-flex items-center gap-1 text-slate-400 text-sm hover:text-white transition-colors mb-3 cursor-pointer"
                     >
                         <ArrowLeft className="w-4 h-4" />
-                        {backLabel}
-                    </Link>
+                        Kembali
+                    </a>
                     <h1 className="text-xl sm:text-2xl font-bold text-white">{report.title}</h1>
                     <div className="flex items-center gap-2 mt-2 flex-wrap">
                         <StatusBadge status={report.status} />

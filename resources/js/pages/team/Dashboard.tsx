@@ -29,7 +29,7 @@ interface Report {
 }
 
 interface PageProps {
-    auth: { user: User };
+    auth: { user: User; teams?: Team[] };
     assignedCount: number;
     resolvedCount: number;
     recentReports: Report[];
@@ -76,13 +76,15 @@ export default function TeamDashboard() {
         });
     };
 
+    const teamName = auth.teams && auth.teams.length > 0 ? auth.teams[0].name : auth.user.name.split(' ')[0];
+
     return (
         <div className="space-y-6 relative">
             {/* Top Greeting Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                     <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
-                        Halo, Tim {auth.user.name.split(' ')[0]}!
+                        Halo, Tim {teamName}!
                     </h1>
                     <p className="text-sm text-gray-500 mt-1">
                         Selamat datang di Dashboard Tim. Periksa tugas yang perlu Anda selesaikan.

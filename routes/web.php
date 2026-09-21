@@ -51,7 +51,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('teams/{team}/members/{user}', [TeamController::class, 'removeMember'])->name('teams.members.remove');
     });
 
-    Route::middleware('role:teacher')->prefix('team')->name('team.')->group(function () {
+    Route::middleware('role:teacher,janitor,technician')->prefix('team')->name('team.')->group(function () {
         Route::get('dashboard', [TeamController::class, 'dashboard'])->name('dashboard');
         Route::get('reports', [TeamController::class, 'reports'])->name('reports');
         Route::post('reports/{report}/in-progress', [TeamController::class, 'markInProgress'])->name('reports.in-progress');
